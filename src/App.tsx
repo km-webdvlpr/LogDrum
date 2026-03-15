@@ -69,7 +69,12 @@ function App() {
                 {isAdminOpen ? 'Hide Control Room' : 'Open Control Room'}
               </button>
             ) : null}
-            <AdminDashboard isOpen={isAdminOpen} canManage={canManage && appEnv.hasSupabase} />
+            <AdminDashboard
+              isOpen={isAdminOpen}
+              canManage={canManage && appEnv.hasSupabase}
+              dateKey={dateKey}
+              dateLabel={dateLabel}
+            />
             <DailyPuzzlePage dateKey={dateKey} dateLabel={dateLabel} user={user} backendEnabled={appEnv.hasSupabase} />
           </div>
           <HowToPlay />

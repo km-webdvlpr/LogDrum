@@ -185,6 +185,17 @@ on public.profiles
 for select
 using (auth.uid() = id);
 
+create policy "admins read all profiles"
+on public.profiles
+for select
+using (
+  exists (
+    select 1 from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.is_admin = true
+  )
+);
+
 create policy "profiles update own record"
 on public.profiles
 for update
@@ -241,6 +252,17 @@ on public.game_attempts
 for select
 using (auth.uid() = user_id);
 
+create policy "admins read all attempts"
+on public.game_attempts
+for select
+using (
+  exists (
+    select 1 from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.is_admin = true
+  )
+);
+
 create policy "players insert own attempts"
 on public.game_attempts
 for insert
@@ -250,5 +272,16 @@ create policy "players read own results"
 on public.game_results
 for select
 using (auth.uid() = user_id);
+
+create policy "admins read all results"
+on public.game_results
+for select
+using (
+  exists (
+    select 1 from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.is_admin = true
+  )
+);
 
 grant execute on function public.record_game_result(uuid, date, text, boolean, integer, integer) to authenticated;

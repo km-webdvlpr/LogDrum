@@ -1,13 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { ClueList } from '../components/ClueList';
 import { GuessHistory } from '../components/GuessHistory';
 import { GuessInput } from '../components/GuessInput';
+import { PlayerInsights } from '../components/PlayerInsights';
 import { ResultCard } from '../components/ResultCard';
 import { SpotifyEmbed } from '../components/SpotifyEmbed';
 import { StatPill } from '../components/StatPill';
+import { ToastBanner } from '../components/ToastBanner';
 import { YouTubeEmbed } from '../components/YouTubeEmbed';
 import { useDailyPuzzle } from '../hooks/useDailyPuzzle';
+import { fetchPlayerHistory } from '../services/gameApi';
+import type { PlayerHistoryRow } from '../types/backend';
 import { getUnlockedClues } from '../utils/puzzle';
 
 interface DailyPuzzlePageProps {
@@ -35,6 +39,7 @@ export function DailyPuzzlePage({
     bestStreak,
     credits,
     solvedCount,
+    totalPlays,
     loading,
     challengeMissing,
     submitGuess,
@@ -45,12 +50,52 @@ export function DailyPuzzlePage({
     backendEnabled
   });
 
-  const [shareNotice, setShareNotice] = useState<string | null>(null);
+  const [shareNotice, setShareNotice] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const [history, setHistory] = useState<PlayerHistoryRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const clueKeys = useMemo(() => getUnlockedClues(clueCount), [clueCount]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHistory() {
+      if (!user || !backendEnabled) {
+        setHistory([]);
+        return;
+      }
+
+      setHistoryLoading(true);
+
+      try {
+        const nextHistory = await fetchPlayerHistory(user.id, 6);
+
+        if (!cancelled) {
+          setHistory(nextHistory);
+        }
+      } catch {
+        if (!cancelled) {
+          setHistory([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setHistoryLoading(false);
+        }
+      }
+    }
+
+    void loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [backendEnabled, isComplete, user]);
 
   async function handleShare() {
     const copied = await copyShare();
-    setShareNotice(copied ? 'Share card copied to clipboard.' : 'Clipboard access failed on this device.');
+    setShareNotice({
+      tone: copied ? 'success' : 'error',
+      text: copied ? 'Share card copied to clipboard.' : 'Clipboard access failed on this device.'
+    });
     window.setTimeout(() => setShareNotice(null), 2400);
     return copied;
   }
@@ -103,6 +148,19 @@ export function DailyPuzzlePage({
         </div>
       </div>
 
+      {user ? (
+        <PlayerInsights
+          email={user.email ?? null}
+          credits={credits}
+          streak={streak}
+          bestStreak={bestStreak}
+          solvedCount={solvedCount}
+          totalPlays={totalPlays}
+          history={history}
+          loading={historyLoading}
+        />
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <div className="space-y-6">
           <GuessInput titles={availableTitles} disabled={!canGuess} onSubmit={submitGuess} />
@@ -114,9 +172,7 @@ export function DailyPuzzlePage({
       {isComplete ? (
         <div className="space-y-6">
           <ResultCard song={song} isSolved={isSolved} attempts={guesses.length} onShare={handleShare} />
-          {shareNotice ? (
-            <p className="rounded-2xl border border-gold/15 bg-gold/10 px-4 py-3 text-sm text-gold">{shareNotice}</p>
-          ) : null}
+          {shareNotice ? <ToastBanner tone={shareNotice.tone} message={shareNotice.text} /> : null}
           <SpotifyEmbed spotifyId={song.spotify_id} />
           <YouTubeEmbed youtubeUrl={song.youtube_url} />
         </div>

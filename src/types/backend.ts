@@ -9,6 +9,15 @@ export interface ProfileRow {
   is_admin: boolean;
 }
 
+export interface SongLightRow {
+  song_id: string;
+  song_title: string;
+  primary_artist: string;
+  year: number;
+  mood: string;
+  substyle: string;
+}
+
 export interface GameAttemptRow {
   challenge_date: string;
   guess_index: number;
@@ -22,4 +31,30 @@ export interface GameResultRow {
   won: boolean;
   attempts_used: number;
   credits_awarded: number;
+}
+
+export interface PlayerHistoryRow {
+  challenge_date: string;
+  song_id: string;
+  won: boolean;
+  attempts_used: number;
+  credits_awarded: number;
+  songs: SongLightRow;
+}
+
+export interface ChallengeDetailRow {
+  challenge_date: string;
+  song_id: string;
+  songs: SongLightRow;
+}
+
+export interface AdminAnalyticsSummary {
+  libraryCount: number;
+  totalPlayers: number;
+  totalResults: number;
+  totalWins: number;
+  activeChallenge: ChallengeDetailRow | null;
+  recentResults: PlayerHistoryRow[];
+  topPlayers: ProfileRow[];
+  songs: SongLightRow[];
 }

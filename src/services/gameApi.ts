@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import type { GameAttemptRow, GameResultRow, ProfileRow } from '../types/backend';
+import type { ChallengeDetailRow, GameAttemptRow, GameResultRow, PlayerHistoryRow, ProfileRow, SongLightRow } from '../types/backend';
 import type { SongEntry } from '../types/game';
 
 interface ChallengeRow {
@@ -47,6 +47,24 @@ export async function fetchDailyChallenge(dateKey: string): Promise<SongEntry | 
 
   const row = data as unknown as ChallengeRow;
   return row.songs;
+}
+
+export async function fetchDailyChallengeDetail(dateKey: string): Promise<ChallengeDetailRow | null> {
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('daily_challenges')
+    .select('challenge_date, song_id, songs(song_id, song_title, primary_artist, year, mood, substyle)')
+    .eq('challenge_date', dateKey)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? mapChallengeDetailRow(data) : null;
 }
 
 export async function fetchProfile(user: User): Promise<ProfileRow | null> {
@@ -103,6 +121,78 @@ export async function fetchResult(userId: string, dateKey: string): Promise<Game
   }
 
   return (data as GameResultRow | null) ?? null;
+}
+
+export async function fetchPlayerHistory(userId: string, limit = 8): Promise<PlayerHistoryRow[]> {
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('game_results')
+    .select(
+      'challenge_date, song_id, won, attempts_used, credits_awarded, songs(song_id, song_title, primary_artist, year, mood, substyle)'
+    )
+    .eq('user_id', userId)
+    .order('challenge_date', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return ((data ?? []) as unknown[]).map(mapPlayerHistoryRow);
+}
+
+export async function fetchSongLibraryLight(): Promise<SongLightRow[]> {
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('songs')
+    .select('song_id, song_title, primary_artist, year, mood, substyle')
+    .order('song_title', { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []) as SongLightRow[];
+}
+
+function mapChallengeDetailRow(input: unknown): ChallengeDetailRow {
+  const row = input as {
+    challenge_date: string;
+    song_id: string;
+    songs: SongLightRow | SongLightRow[];
+  };
+
+  return {
+    challenge_date: row.challenge_date,
+    song_id: row.song_id,
+    songs: Array.isArray(row.songs) ? row.songs[0] : row.songs
+  };
+}
+
+function mapPlayerHistoryRow(input: unknown): PlayerHistoryRow {
+  const row = input as {
+    challenge_date: string;
+    song_id: string;
+    won: boolean;
+    attempts_used: number;
+    credits_awarded: number;
+    songs: SongLightRow | SongLightRow[];
+  };
+
+  return {
+    challenge_date: row.challenge_date,
+    song_id: row.song_id,
+    won: row.won,
+    attempts_used: row.attempts_used,
+    credits_awarded: row.credits_awarded,
+    songs: Array.isArray(row.songs) ? row.songs[0] : row.songs
+  };
 }
 
 export async function saveAttempt(params: {

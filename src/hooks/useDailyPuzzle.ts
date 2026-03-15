@@ -28,6 +28,7 @@ interface UseDailyPuzzleResult {
   bestStreak: number;
   credits: number;
   solvedCount: number;
+  totalPlays: number;
   loading: boolean;
   usingBackend: boolean;
   challengeMissing: boolean;
@@ -245,6 +246,7 @@ export function useDailyPuzzle({
     bestStreak: profile?.best_streak ?? localProgress.bestStreak,
     credits: profile?.credits ?? localProgress.credits,
     solvedCount: profile?.total_solves ?? localProgress.solvedHistory.length,
+    totalPlays: profile?.total_plays ?? Object.keys(localProgress.completionByDate).length,
     loading,
     usingBackend,
     challengeMissing,

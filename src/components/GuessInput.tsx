@@ -9,6 +9,7 @@ interface GuessInputProps {
 export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
   const [value, setValue] = useState('');
   const [message, setMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const suggestions = useMemo(() => {
     if (!value.trim()) {
@@ -31,7 +32,9 @@ export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsSubmitting(true);
     const result = await onSubmit(value);
+    setIsSubmitting(false);
 
     if (result.accepted) {
       setValue('');
@@ -50,7 +53,7 @@ export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
           <input
             value={value}
             onChange={(event) => setValue(event.target.value)}
-            disabled={disabled}
+            disabled={disabled || isSubmitting}
             placeholder={disabled ? 'Today is complete' : 'Type a song title'}
             className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-haze outline-none transition placeholder:text-haze/35 focus:border-gold/50 focus:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
           />
@@ -58,14 +61,17 @@ export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
 
         <button
           type="submit"
-          disabled={disabled}
+          disabled={disabled || isSubmitting}
           className="w-full rounded-2xl bg-gradient-to-r from-gold via-spice to-ember px-4 py-3 font-semibold uppercase tracking-[0.2em] text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Lock In Guess
+          {isSubmitting ? 'Checking...' : 'Lock In Guess'}
         </button>
       </form>
 
       {message ? <p className="mt-3 text-sm text-spice">{message}</p> : null}
+      {!message && !disabled ? (
+        <p className="mt-3 text-sm text-haze/55">Search fast, tap a suggestion, and keep the streak moving.</p>
+      ) : null}
 
       <div className="mt-4">
         <p className="mb-2 text-xs uppercase tracking-[0.28em] text-haze/45">Autocomplete crate</p>
@@ -75,7 +81,7 @@ export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
               key={title}
               type="button"
               onClick={() => setValue(title)}
-              disabled={disabled}
+              disabled={disabled || isSubmitting}
               className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-haze/75 transition hover:border-gold/40 hover:text-haze disabled:cursor-not-allowed disabled:opacity-50"
             >
               {title}
