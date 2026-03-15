@@ -10,6 +10,7 @@ export interface SongEntry {
   difficulty: 'easy' | 'medium' | 'hard';
   title_length: number;
   spotify_id: string;
+  youtube_url?: string;
   insight_story: string;
 }
 
@@ -22,6 +23,7 @@ export interface DailyCompletionRecord {
 export interface StoredProgress {
   streak: number;
   bestStreak: number;
+  credits: number;
   solvedHistory: string[];
   lastPlayedDate: string;
   lastCompletedDate: string;

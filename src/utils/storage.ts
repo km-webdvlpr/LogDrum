@@ -5,6 +5,7 @@ const STORAGE_KEY = 'logdrum-progress-v1';
 const defaultProgress: StoredProgress = {
   streak: 0,
   bestStreak: 0,
+  credits: 0,
   solvedHistory: [],
   lastPlayedDate: '',
   lastCompletedDate: '',

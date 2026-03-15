@@ -45,7 +45,21 @@ npm run preview
 - [`docs/BRD.md`](./docs/BRD.md)
 - [`docs/PRD.md`](./docs/PRD.md)
 - [`docs/TRD.md`](./docs/TRD.md)
+- [`docs/SUPABASE_SETUP.md`](./docs/SUPABASE_SETUP.md)
 
 ## Deployment
 
 This project is compatible with static hosting providers such as GitHub Pages, Vercel, and Netlify.
+
+## Supabase Setup
+
+1. Create a Supabase project.
+2. In the SQL editor, run [`supabase/schema.sql`](./supabase/schema.sql).
+3. Copy [`.env.example`](./.env.example) to `.env.local`.
+4. Set:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_ADMIN_EMAILS`
+5. Mark your own user as admin by updating `profiles.is_admin = true` in Supabase after your first login.
+
+Without Supabase env values, LogDrum still runs in local gameplay mode for frontend iteration.

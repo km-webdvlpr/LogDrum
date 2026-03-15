@@ -1,102 +1,170 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { SongEntry, StoredProgress } from '../types/game';
-import { getSouthAfricaDateKey } from '../utils/date';
-import {
-  getAvailableTitles,
-  getDailySong,
-  normalizeTitle,
-  getShareText,
-  getUnlockedClues,
-  isCorrectGuess
-} from '../utils/puzzle';
+import type { User } from '@supabase/supabase-js';
+import type { StoredProgress, SongEntry } from '../types/game';
+import type { ProfileRow, GameResultRow } from '../types/backend';
+import { getAvailableTitles, getDailySong, getShareText, getUnlockedClues, isCorrectGuess, normalizeTitle } from '../utils/puzzle';
 import { getStoredProgress, saveStoredProgress } from '../utils/storage';
+import { fetchAttempts, fetchDailyChallenge, fetchProfile, fetchResult, fetchSongLibrary, finalizeResult, saveAttempt } from '../services/gameApi';
 
 const MAX_GUESSES = 6;
+const SOLVE_REWARD = 5;
+const PARTICIPATION_REWARD = 1;
+
+interface UseDailyPuzzleOptions {
+  dateKey: string;
+  user: User | null;
+  backendEnabled: boolean;
+}
 
 interface UseDailyPuzzleResult {
-  dateKey: string;
-  song: SongEntry;
+  song: SongEntry | null;
   guesses: string[];
   availableTitles: string[];
   clueCount: number;
   isSolved: boolean;
   isComplete: boolean;
   canGuess: boolean;
-  progress: StoredProgress;
-  shareText: string;
-  submitGuess: (guess: string) => { accepted: boolean; message?: string };
+  streak: number;
+  bestStreak: number;
+  credits: number;
+  solvedCount: number;
+  loading: boolean;
+  usingBackend: boolean;
+  challengeMissing: boolean;
+  submitGuess: (guess: string) => Promise<{ accepted: boolean; message?: string }>;
   copyShare: () => Promise<boolean>;
 }
 
-export function useDailyPuzzle(): UseDailyPuzzleResult {
-  const dateKey = useMemo(() => getSouthAfricaDateKey(), []);
-  const song = useMemo(() => getDailySong(dateKey), [dateKey]);
-  const availableTitles = useMemo(() => getAvailableTitles(), []);
+export function useDailyPuzzle({
+  dateKey,
+  user,
+  backendEnabled
+}: UseDailyPuzzleOptions): UseDailyPuzzleResult {
+  const [song, setSong] = useState<SongEntry | null>(null);
+  const [availableTitles, setAvailableTitles] = useState<string[]>(() => getAvailableTitles());
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [localProgress, setLocalProgress] = useState<StoredProgress>(() => getStoredProgress());
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
+  const [remoteResult, setRemoteResult] = useState<GameResultRow | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [challengeMissing, setChallengeMissing] = useState(false);
 
-  const [progress, setProgress] = useState<StoredProgress>(() => getStoredProgress());
-  const initialGuesses = progress.activeSession?.date === dateKey ? progress.activeSession.guesses : [];
-  const completion = progress.completionByDate[dateKey];
-  const [guesses, setGuesses] = useState<string[]>(initialGuesses);
-
-  useEffect(() => {
-    const latest = getStoredProgress();
-    setProgress(latest);
-    setGuesses(latest.activeSession?.date === dateKey ? latest.activeSession.guesses : []);
-  }, [dateKey]);
-
-  const isSolved = completion?.won ?? guesses.some((guess) => isCorrectGuess(guess, song));
-  const isComplete = Boolean(completion) || isSolved || guesses.length >= MAX_GUESSES;
-  const wrongGuessCount = isSolved ? guesses.length - 1 : guesses.length;
-  const clueCount = Math.min(Math.max(wrongGuessCount, 0), MAX_GUESSES);
-  const shareText = getShareText(dateKey, guesses, isSolved);
+  const usingBackend = backendEnabled;
 
   useEffect(() => {
-    const latest = getStoredProgress();
-    const next: StoredProgress = {
-      ...latest,
-      lastPlayedDate: guesses.length > 0 ? dateKey : latest.lastPlayedDate,
-      activeSession: {
-        date: dateKey,
-        guesses,
-        isComplete
-      }
-    };
+    let cancelled = false;
 
-    if (isComplete) {
-      const previousDate = latest.lastCompletedDate;
-      const solvedHistory = isSolved
-        ? Array.from(new Set([...latest.solvedHistory, song.song_id]))
-        : latest.solvedHistory;
+    async function loadGameState() {
+      setLoading(true);
 
-      const streak =
-        isSolved && previousDate !== dateKey
-          ? previousDate && daysBetween(previousDate, dateKey) === 1
-            ? latest.streak + 1
-            : 1
-          : isSolved
-            ? latest.streak
-            : 0;
+      try {
+        let nextSong: SongEntry | null = null;
+        let nextTitles = getAvailableTitles();
+        let nextChallengeMissing = false;
 
-      next.streak = streak;
-      next.bestStreak = Math.max(latest.bestStreak, streak);
-      next.solvedHistory = solvedHistory;
-      next.lastCompletedDate = dateKey;
-      next.completionByDate = {
-        ...latest.completionByDate,
-        [dateKey]: {
-          won: isSolved,
-          attempts: guesses.length,
-          songId: song.song_id
+        if (backendEnabled) {
+          try {
+            const [library, challenge] = await Promise.all([
+              fetchSongLibrary(),
+              fetchDailyChallenge(dateKey)
+            ]);
+
+            if (library.length > 0) {
+              nextTitles = library.map((entry) => entry.song_title).sort((a, b) => a.localeCompare(b));
+            }
+
+            if (challenge) {
+              nextSong = challenge;
+            } else {
+              nextChallengeMissing = true;
+            }
+          } catch {
+            nextSong = null;
+          }
         }
-      };
+
+        if (!nextSong) {
+          nextSong = getDailySong(dateKey);
+          nextChallengeMissing = false;
+        }
+
+        const latestLocal = getStoredProgress();
+
+        if (!cancelled) {
+          setSong(nextSong);
+          setAvailableTitles(nextTitles);
+          setLocalProgress(latestLocal);
+          setChallengeMissing(nextChallengeMissing);
+        }
+
+        if (backendEnabled && user) {
+          const [attempts, result, nextProfile] = await Promise.all([
+            fetchAttempts(user.id, dateKey),
+            fetchResult(user.id, dateKey),
+            fetchProfile(user)
+          ]);
+
+          if (!cancelled) {
+            setGuesses(attempts.map((attempt) => attempt.guess_text));
+            setRemoteResult(result);
+            setProfile(nextProfile);
+          }
+        } else if (!cancelled) {
+          setGuesses(latestLocal.activeSession?.date === dateKey ? latestLocal.activeSession.guesses : []);
+          setRemoteResult(null);
+          setProfile(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     }
 
-    saveStoredProgress(next);
-    setProgress(next);
-  }, [dateKey, guesses, isComplete, isSolved, song.song_id]);
+    void loadGameState();
 
-  function submitGuess(rawGuess: string) {
+    return () => {
+      cancelled = true;
+    };
+  }, [backendEnabled, dateKey, user]);
+
+  const isSolved = useMemo(() => {
+    if (!song) {
+      return false;
+    }
+
+    return remoteResult?.won ?? guesses.some((guess) => isCorrectGuess(guess, song));
+  }, [guesses, remoteResult?.won, song]);
+
+  const isComplete = Boolean(remoteResult) || isSolved || guesses.length >= MAX_GUESSES;
+  const wrongGuessCount = isSolved ? guesses.length - 1 : guesses.length;
+  const clueCount = Math.min(Math.max(wrongGuessCount, 0), MAX_GUESSES);
+
+  useEffect(() => {
+    if (!song || (backendEnabled && user)) {
+      return;
+    }
+
+    const latest = getStoredProgress();
+    const next = buildLocalProgress({
+      latest,
+      dateKey,
+      guesses,
+      isComplete,
+      isSolved,
+      songId: song.song_id
+    });
+
+    saveStoredProgress(next);
+    setLocalProgress(next);
+  }, [backendEnabled, dateKey, guesses, isComplete, isSolved, song, user]);
+
+  async function submitGuess(rawGuess: string) {
     const guess = rawGuess.trim();
+
+    if (!song) {
+      return { accepted: false, message: 'The challenge is still loading.' };
+    }
 
     if (isComplete) {
       return { accepted: false, message: 'Today is wrapped. Come back tomorrow for a fresh drop.' };
@@ -116,13 +184,49 @@ export function useDailyPuzzle(): UseDailyPuzzleResult {
       return { accepted: false, message: 'You already spun that record today.' };
     }
 
-    setGuesses((current) => [...current, guess]);
+    const nextGuessIndex = guesses.length + 1;
+    const nextIsCorrect = isCorrectGuess(guess, song);
+    const nextGuesses = [...guesses, guess];
+    setGuesses(nextGuesses);
+
+    if (backendEnabled && user) {
+      await saveAttempt({
+        userId: user.id,
+        dateKey,
+        songId: song.song_id,
+        guessText: guess,
+        guessIndex: nextGuessIndex,
+        isCorrect: nextIsCorrect
+      });
+
+      if (nextIsCorrect || nextGuesses.length >= MAX_GUESSES) {
+        const creditsAwarded = nextIsCorrect ? SOLVE_REWARD : PARTICIPATION_REWARD;
+
+        await finalizeResult({
+          userId: user.id,
+          dateKey,
+          songId: song.song_id,
+          won: nextIsCorrect,
+          attemptsUsed: nextGuesses.length,
+          creditsAwarded
+        });
+
+        const [nextProfile, nextResult] = await Promise.all([
+          fetchProfile(user),
+          fetchResult(user.id, dateKey)
+        ]);
+
+        setProfile(nextProfile);
+        setRemoteResult(nextResult);
+      }
+    }
+
     return { accepted: true };
   }
 
   async function copyShare() {
     try {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(getShareText(dateKey, guesses, isSolved));
       return true;
     } catch {
       return false;
@@ -130,7 +234,6 @@ export function useDailyPuzzle(): UseDailyPuzzleResult {
   }
 
   return {
-    dateKey,
     song,
     guesses,
     availableTitles,
@@ -138,10 +241,81 @@ export function useDailyPuzzle(): UseDailyPuzzleResult {
     isSolved,
     isComplete,
     canGuess: !isComplete && guesses.length < MAX_GUESSES,
-    progress,
-    shareText,
+    streak: profile?.streak ?? localProgress.streak,
+    bestStreak: profile?.best_streak ?? localProgress.bestStreak,
+    credits: profile?.credits ?? localProgress.credits,
+    solvedCount: profile?.total_solves ?? localProgress.solvedHistory.length,
+    loading,
+    usingBackend,
+    challengeMissing,
     submitGuess,
     copyShare
+  };
+}
+
+function buildLocalProgress({
+  latest,
+  dateKey,
+  guesses,
+  isComplete,
+  isSolved,
+  songId
+}: {
+  latest: StoredProgress;
+  dateKey: string;
+  guesses: string[];
+  isComplete: boolean;
+  isSolved: boolean;
+  songId: string;
+}) {
+  const existingCompletion = latest.completionByDate[dateKey];
+  const next: StoredProgress = {
+    ...latest,
+    lastPlayedDate: guesses.length > 0 ? dateKey : latest.lastPlayedDate,
+    activeSession: {
+      date: dateKey,
+      guesses,
+      isComplete
+    }
+  };
+
+  if (!isComplete) {
+    return next;
+  }
+
+  if (existingCompletion) {
+    return {
+      ...next,
+      lastCompletedDate: dateKey
+    };
+  }
+
+  const previousDate = latest.lastCompletedDate;
+  const solvedHistory = isSolved ? Array.from(new Set([...latest.solvedHistory, songId])) : latest.solvedHistory;
+  const streak =
+    isSolved && previousDate !== dateKey
+      ? previousDate && daysBetween(previousDate, dateKey) === 1
+        ? latest.streak + 1
+        : 1
+      : isSolved
+        ? latest.streak
+        : 0;
+
+  return {
+    ...next,
+    streak,
+    bestStreak: Math.max(latest.bestStreak, streak),
+    credits: latest.credits + (isSolved ? SOLVE_REWARD : PARTICIPATION_REWARD),
+    solvedHistory,
+    lastCompletedDate: dateKey,
+    completionByDate: {
+      ...latest.completionByDate,
+      [dateKey]: {
+        won: isSolved,
+        attempts: guesses.length,
+        songId
+      }
+    }
   };
 }
 

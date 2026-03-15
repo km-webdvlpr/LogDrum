@@ -1,11 +1,24 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { AdminDashboard } from './components/AdminDashboard';
 import { AboutModal } from './components/AboutModal';
+import { AuthPanel } from './components/AuthPanel';
 import { HeroPanel } from './components/HeroPanel';
 import { HowToPlay } from './components/HowToPlay';
+import { SetupNotice } from './components/SetupNotice';
+import { useAuthSession } from './hooks/useAuthSession';
+import { useSouthAfricaClock } from './hooks/useSouthAfricaClock';
+import { appEnv } from './lib/env';
 import { DailyPuzzlePage } from './pages/DailyPuzzlePage';
 
 function App() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const { user, loading, signInWithEmail, signOut } = useAuthSession();
+  const { dateKey, dateLabel } = useSouthAfricaClock();
+  const canManage = useMemo(() => {
+    const email = user?.email?.toLowerCase() ?? '';
+    return Boolean(email && appEnv.adminEmails.includes(email));
+  }, [user?.email]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-mural text-haze">
@@ -38,8 +51,26 @@ function App() {
 
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div className="space-y-6">
-            <HeroPanel />
-            <DailyPuzzlePage />
+            <HeroPanel dateLabel={dateLabel} />
+            <SetupNotice backendEnabled={appEnv.hasSupabase} />
+            <AuthPanel
+              backendEnabled={appEnv.hasSupabase}
+              userEmail={user?.email ?? null}
+              loading={loading}
+              onSignIn={signInWithEmail}
+              onSignOut={signOut}
+            />
+            {canManage ? (
+              <button
+                type="button"
+                onClick={() => setIsAdminOpen((current) => !current)}
+                className="rounded-full border border-gold/25 bg-gold/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-gold transition hover:bg-gold/15"
+              >
+                {isAdminOpen ? 'Hide Control Room' : 'Open Control Room'}
+              </button>
+            ) : null}
+            <AdminDashboard isOpen={isAdminOpen} canManage={canManage && appEnv.hasSupabase} />
+            <DailyPuzzlePage dateKey={dateKey} dateLabel={dateLabel} user={user} backendEnabled={appEnv.hasSupabase} />
           </div>
           <HowToPlay />
         </div>

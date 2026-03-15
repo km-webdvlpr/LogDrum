@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 interface GuessInputProps {
   titles: string[];
   disabled: boolean;
-  onSubmit: (guess: string) => { accepted: boolean; message?: string };
+  onSubmit: (guess: string) => Promise<{ accepted: boolean; message?: string }>;
 }
 
 export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
@@ -29,9 +29,9 @@ export function GuessInput({ titles, disabled, onSubmit }: GuessInputProps) {
     return () => window.clearTimeout(timer);
   }, [message]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = onSubmit(value);
+    const result = await onSubmit(value);
 
     if (result.accepted) {
       setValue('');
