@@ -1,51 +1,44 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        ink: '#090909',
-        coal: '#10100f',
-        gold: '#d4a93d',
-        ember: '#ff6b1a',
-        spice: '#ff9345',
-        moss: '#8f9f52',
-        plum: '#542344',
-        haze: '#f5e6b8'
-      },
-      boxShadow: {
-        glow: '0 0 0 1px rgba(255,255,255,0.06), 0 20px 80px rgba(255, 107, 26, 0.18)',
-        gold: '0 25px 80px rgba(212, 169, 61, 0.16)'
-      },
-      backgroundImage: {
-        mural:
-          'radial-gradient(circle at top left, rgba(255,107,26,0.35), transparent 38%), radial-gradient(circle at 80% 20%, rgba(212,169,61,0.28), transparent 32%), radial-gradient(circle at bottom right, rgba(84,35,68,0.38), transparent 36%), linear-gradient(135deg, #050505 0%, #11110f 45%, #1c120d 100%)'
+        gold: '#D4A93D',
+        ember: '#FF6B1A',
+        haze: '#C8C0B8',
+        coal: '#0C0C0C',
+        ink: '#141414',
       },
       fontFamily: {
         display: ['"Bebas Neue"', 'sans-serif'],
-        body: ['"Sora"', 'sans-serif']
+        body: ['"Sora"', 'sans-serif'],
+      },
+      boxShadow: {
+        glow: '0 0 30px rgba(212, 169, 61, 0.08), 0 4px 32px rgba(0, 0, 0, 0.6)',
       },
       animation: {
-        float: 'float 6s ease-in-out infinite',
-        pulseGlow: 'pulseGlow 4s ease-in-out infinite',
-        rise: 'rise 0.7s ease-out forwards'
+        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+        rise: 'rise 0.35s ease-out forwards',
+        pop: 'pop 0.25s ease-out forwards',
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' }
-        },
         pulseGlow: {
-          '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
-          '50%': { opacity: '0.9', transform: 'scale(1.06)' }
+          '0%, 100%': { boxShadow: '0 0 8px rgba(212, 169, 61, 0.25)' },
+          '50%': { boxShadow: '0 0 22px rgba(212, 169, 61, 0.6), 0 0 44px rgba(212, 169, 61, 0.2)' },
         },
         rise: {
-          '0%': { opacity: '0', transform: 'translateY(18px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' }
-        }
-      }
-    }
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        pop: {
+          '0%': { transform: 'scale(0.95)', opacity: '0.7' },
+          '60%': { transform: 'scale(1.04)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+    },
   },
-  plugins: []
-} satisfies Config;
+  plugins: [],
+} satisfies Config

@@ -1,28 +1,22 @@
-# LogDrum
+# WELA
 
-LogDrum is a non-commercial portfolio project: a daily Amapiano discovery game where players guess the Song of the Day using progressive clues.
+A daily Amapiano artist-connection game. Navigate from one artist to another through shared songs, in as few hops as possible.
 
-## What It Is
+Built as a non-commercial portfolio piece — no backend, no accounts, no streaks.
 
-- A mobile-first daily puzzle inspired by music discovery, not by existing puzzle branding
-- A cultural web experience rooted in South African Amapiano energy and Johannesburg-inspired visual direction
-- A front-end portfolio piece showing product thinking, documentation discipline, and polished interaction design
+## How It Works
 
-## How The Daily Puzzle Works
+- One new challenge is generated each day using the South Africa date (`Africa/Johannesburg`)
+- Start at one artist, reach the destination by hopping through artists who share songs
+- Tap a valid artist to move — the connecting song is shown at each step
+- Your path and hop count are saved locally; compare against the optimal route
 
-- One new puzzle is selected each day using the South Africa date (`Africa/Johannesburg`)
-- Players get up to 6 guesses to identify the song title
-- After each incorrect guess, a new clue is revealed
-- Guesses autocomplete from the local dataset
-- Progress is stored in `localStorage`, including streak, solved history, and completion state
-- After the puzzle ends, players enter the "After the Drop" screen with song details and an official Spotify embed if a `spotify_id` exists
+## Stack
 
-## Constraints
-
-- Non-commercial only
-- No copyrighted lyrics
-- No self-hosted or proxied audio
-- Spotify embeds are used only as post-puzzle discovery rewards
+- React 18 + TypeScript + Vite 6 + Tailwind CSS 3
+- Pure graph engine (BFS pathfinding, adjacency + edge maps)
+- Deterministic daily seeding via LCG hash from SA timezone date
+- No backend — all state in localStorage
 
 ## Local Development
 
@@ -31,8 +25,6 @@ npm install
 npm run dev
 ```
 
-Then open the local Vite URL shown in the terminal.
-
 ## Production Build
 
 ```bash
@@ -40,26 +32,7 @@ npm run build
 npm run preview
 ```
 
-## Docs
-
-- [`docs/BRD.md`](./docs/BRD.md)
-- [`docs/PRD.md`](./docs/PRD.md)
-- [`docs/TRD.md`](./docs/TRD.md)
-- [`docs/SUPABASE_SETUP.md`](./docs/SUPABASE_SETUP.md)
-
 ## Deployment
 
-This project is compatible with static hosting providers such as GitHub Pages, Vercel, and Netlify.
-
-## Supabase Setup
-
-1. Create a Supabase project.
-2. In the SQL editor, run [`supabase/schema.sql`](./supabase/schema.sql).
-3. Copy [`.env.example`](./.env.example) to `.env.local`.
-4. Set:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_ADMIN_EMAILS`
-5. Mark your own user as admin by updating `profiles.is_admin = true` in Supabase after your first login.
-
-Without Supabase env values, LogDrum still runs in local gameplay mode for frontend iteration.
+Deployed to GitHub Pages via GitHub Actions on push to `main`.
+Live at: https://km-webdvlpr.github.io/LogDrum/

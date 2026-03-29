@@ -10,53 +10,36 @@
   background: #060606;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
   background: #060606;
+  -webkit-tap-highlight-color: transparent;
 }
 
-button,
-input {
-  font: inherit;
-}
+button, input { font: inherit; }
 
+/* Grid noise texture */
 .noise-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.08;
+  opacity: 0.06;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 140px 140px;
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 120px 120px;
   mix-blend-mode: soft-light;
+  z-index: 0;
 }
 
-.panel {
-  @apply rounded-[30px] border border-white/10 bg-black/40 backdrop-blur-xl shadow-glow;
-}
-
-.spray-label {
-  text-shadow:
-    0 0 14px rgba(255, 107, 26, 0.45),
-    0 0 30px rgba(212, 169, 61, 0.15);
-}
-
-.vinyl-ring {
-  background:
-    radial-gradient(circle, rgba(12, 12, 12, 0.9) 0 18%, rgba(212, 169, 61, 0.65) 18% 21%, rgba(12, 12, 12, 0.96) 21% 33%, rgba(255, 255, 255, 0.05) 33% 34%, rgba(12, 12, 12, 0.98) 34% 100%);
-}
-
-.text-balance {
-  text-wrap: balance;
+/* Ensure content sits above noise */
+header, main, div[class*='px-'] {
+  position: relative;
+  z-index: 1;
 }

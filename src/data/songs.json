@@ -1,0 +1,140 @@
+[
+  {
+    "id": "sponono",
+    "title": "Sponono",
+    "year": 2020,
+    "artists": ["kabza", "maphorisa", "wizkid", "burna-boy", "cassper-nyovest"]
+  },
+  {
+    "id": "asibe-happy",
+    "title": "Asibe Happy",
+    "year": 2021,
+    "artists": ["kabza", "ami-faku"]
+  },
+  {
+    "id": "abalele",
+    "title": "Abalele",
+    "year": 2021,
+    "artists": ["kabza", "maphorisa", "ami-faku"]
+  },
+  {
+    "id": "emcimbini",
+    "title": "Emcimbini",
+    "year": 2020,
+    "artists": ["kabza", "maphorisa", "aymos", "samthing-soweto", "myztro"]
+  },
+  {
+    "id": "adiwele",
+    "title": "Adiwele",
+    "year": 2021,
+    "artists": ["young-stunna", "kabza", "maphorisa"]
+  },
+  {
+    "id": "bopha",
+    "title": "Bopha",
+    "year": 2021,
+    "artists": ["maphorisa", "kabza", "tyler-icu", "sir-trill", "daliwonga"]
+  },
+  {
+    "id": "mnike",
+    "title": "Mnike",
+    "year": 2023,
+    "artists": ["tyler-icu", "maphorisa", "tumelo-za", "sir-trill"]
+  },
+  {
+    "id": "ke-star",
+    "title": "Ke Star",
+    "year": 2021,
+    "artists": ["focalistic", "davido"]
+  },
+  {
+    "id": "ke-galopa",
+    "title": "Ke Galopa",
+    "year": 2020,
+    "artists": ["focalistic", "kabza"]
+  },
+  {
+    "id": "nkulunkulu",
+    "title": "Nkulunkulu",
+    "year": 2020,
+    "artists": ["mfr-souls", "sha-sha", "maphorisa", "kabza"]
+  },
+  {
+    "id": "amanikiniki",
+    "title": "Amanikiniki",
+    "year": 2019,
+    "artists": ["mfr-souls", "kabza", "maphorisa"]
+  },
+  {
+    "id": "khuza-gogo",
+    "title": "Khuza Gogo",
+    "year": 2021,
+    "artists": ["dbn-gogo", "mellow-sleazy"]
+  },
+  {
+    "id": "sukakude",
+    "title": "Sukakude",
+    "year": 2022,
+    "artists": ["kabza", "maphorisa", "aymos", "nkosazana-daughter"]
+  },
+  {
+    "id": "abo-mvelo",
+    "title": "Abo Mvelo",
+    "year": 2021,
+    "artists": ["daliwonga", "mellow-sleazy"]
+  },
+  {
+    "id": "tobetsa",
+    "title": "Tobetsa",
+    "year": 2022,
+    "artists": ["myztro", "felo-le-tee", "daliwonga"]
+  },
+  {
+    "id": "dakiwe",
+    "title": "Dakiwe",
+    "year": 2020,
+    "artists": ["mlindo", "sha-sha", "kabza", "maphorisa"]
+  },
+  {
+    "id": "izolo",
+    "title": "Izolo",
+    "year": 2023,
+    "artists": ["maphorisa", "kabza", "mellow-sleazy"]
+  },
+  {
+    "id": "woza",
+    "title": "Woza",
+    "year": 2020,
+    "artists": ["mfr-souls", "kabza", "maphorisa", "sha-sha"]
+  },
+  {
+    "id": "jola",
+    "title": "Jola",
+    "year": 2023,
+    "artists": ["mellow-sleazy", "tman-xpress"]
+  },
+  {
+    "id": "yebo-lapho",
+    "title": "Yebo Lapho",
+    "year": 2023,
+    "artists": ["felo-le-tee", "mellow-sleazy", "tman-xpress"]
+  },
+  {
+    "id": "sgija-disciples",
+    "title": "Sgija Disciples",
+    "year": 2023,
+    "artists": ["mellow-sleazy", "tman-xpress"]
+  },
+  {
+    "id": "hello",
+    "title": "Hello",
+    "year": 2023,
+    "artists": ["musa-keys", "sir-trill"]
+  },
+  {
+    "id": "dali-nguwe",
+    "title": "Dali Nguwe",
+    "year": 2021,
+    "artists": ["kabza", "samthing-soweto"]
+  }
+]
