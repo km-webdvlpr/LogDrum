@@ -3,12 +3,14 @@ import type { Challenge, PathStep, Artist } from '../types/wela'
 import { findShortestPath, getSongsBetween } from '../engine/graph'
 import type { Graph } from '../types/wela'
 import { ToastBanner } from './ToastBanner'
+import type { AppCopy } from '../content/copy'
 
 interface ResultScreenProps {
   challenge: Challenge
   path: PathStep[]
   artists: Artist[]
   graph: Graph
+  copy: AppCopy
   onPractice: () => void
   solvedFromHistory?: boolean
 }
@@ -20,24 +22,14 @@ function artistName(artists: Artist[], id: string) {
 function buildShareText(
   challenge: Challenge,
   path: PathStep[],
-  artists: Artist[]
+  artists: Artist[],
+  copy: AppCopy
 ): string {
   const names = [
     artistName(artists, challenge.startId),
     ...path.map((s) => artistName(artists, s.toId)),
   ]
-  const hops = path.length
-  const optimal = challenge.optimalLength
-  const hopLabel = hops === 1 ? '1 hop' : `${hops} hops`
-  const optLabel = optimal === 1 ? '1 hop' : `${optimal} hops`
-  const efficiency = hops === optimal ? 'optimal line' : `(optimal: ${optLabel})`
-
-  return [
-    `WELA | ${challenge.date}`,
-    `${hopLabel} ${efficiency}`,
-    names.join(' -> '),
-    '#WELA #Amapiano',
-  ].join('\n')
+  return copy.share.build(challenge.date, path.length, challenge.optimalLength, names)
 }
 
 export function ResultScreen({
@@ -45,6 +37,7 @@ export function ResultScreen({
   path,
   artists,
   graph,
+  copy,
   onPractice,
   solvedFromHistory = false,
 }: ResultScreenProps) {
@@ -54,7 +47,7 @@ export function ResultScreen({
   const optimal = challenge.optimalLength
   const isOptimal = hops === optimal
   const isDaily = challenge.date !== 'practice'
-  const shareText = buildShareText(challenge, path, artists)
+  const shareText = buildShareText(challenge, path, artists, copy)
 
   const optimalArtistPath =
     findShortestPath(graph, challenge.startId, challenge.destinationId) ?? []
@@ -77,13 +70,13 @@ export function ResultScreen({
         {solvedFromHistory && isDaily && (
           <ToastBanner
             tone="info"
-            message="This result was restored from local history for today's daily route."
+            message={copy.toasts.restoredHistory}
           />
         )}
         {shareState === 'error' && (
           <ToastBanner
             tone="error"
-            message="Share copy was blocked in this browser session. A manual copy version is available below."
+            message={copy.toasts.shareError}
           />
         )}
       </div>
@@ -92,24 +85,26 @@ export function ResultScreen({
         <p className="font-display text-5xl tracking-widest text-gold mb-1">
           {hops}
           <span className="text-2xl text-gold/50 ml-1">
-            {hops === 1 ? 'hop' : 'hops'}
+            {copy.result.hopUnit(hops)}
           </span>
         </p>
-        <p className="text-haze/50 text-sm">
-          {isOptimal
-            ? 'Optimal path matched.'
-            : `Optimal was ${optimal} ${optimal === 1 ? 'hop' : 'hops'}`}
+        <p className="text-haze/80 text-sm">
+          {isOptimal ? copy.result.optimalMatched : copy.result.optimalWas(optimal)}
         </p>
       </div>
 
       <div className="mb-5">
-        <p className="text-[10px] text-haze/40 uppercase tracking-widest mb-2">Your path</p>
+        <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-2">
+          {copy.result.yourPath}
+        </p>
         <PathDisplay path={path} artists={artists} challenge={challenge} />
       </div>
 
       {!isOptimal && optimalArtistPath.length > 0 && (
         <div className="mb-6">
-          <p className="text-[10px] text-haze/40 uppercase tracking-widest mb-2">Optimal path</p>
+          <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-2">
+            {copy.result.optimalPath}
+          </p>
           <OptimalDisplay
             artistIds={optimalArtistPath}
             artists={artists}
@@ -121,34 +116,32 @@ export function ResultScreen({
       <div className="flex flex-col gap-3 mt-6">
         <button
           onClick={handleShare}
-          className="w-full rounded-2xl border border-gold/30 bg-gold/10 py-3.5 text-gold text-sm font-semibold tracking-wide active:scale-98 transition-transform"
+          className="w-full rounded-2xl border border-gold/30 bg-gold/10 py-3.5 text-gold text-sm font-semibold tracking-wide active:scale-98 transition-transform shadow-glow"
         >
-          {shareState === 'copied' ? 'Copied to clipboard' : 'Share result'}
+          {shareState === 'copied' ? copy.result.copiedToClipboard : copy.result.shareResult}
         </button>
 
         <button
           onClick={onPractice}
-          className="w-full rounded-2xl border border-white/8 bg-white/4 py-3 text-haze/70 text-sm active:scale-98 transition-transform"
+          className="w-full rounded-2xl border border-ink/10 bg-white/75 py-3 text-ink/80 text-sm active:scale-98 transition-transform"
         >
-          {isDaily ? 'Open practice mode' : 'Return to daily route'}
+          {isDaily ? copy.result.openPractice : copy.result.returnToDaily}
         </button>
 
         {isDaily && (
-          <p className="text-center text-haze/30 text-xs mt-1">
-            New challenge tomorrow at midnight SA time
-          </p>
+          <p className="text-center text-haze/70 text-xs mt-1">{copy.result.nextDaily}</p>
         )}
       </div>
 
       {shareState === 'error' && (
         <div className="mt-4">
-          <p className="text-[10px] text-haze/40 uppercase tracking-widest mb-2">
-            Manual share text
+          <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-2">
+            {copy.result.manualShareText}
           </p>
           <textarea
             readOnly
             value={shareText}
-            className="w-full min-h-[112px] rounded-2xl border border-white/10 bg-white/4 p-3 text-xs leading-relaxed text-haze/75 resize-none"
+            className="w-full min-h-[112px] rounded-2xl border border-ink/10 bg-white/75 p-3 text-xs leading-relaxed text-ink/80 resize-none"
           />
         </div>
       )}
@@ -168,7 +161,7 @@ function PathDisplay({
   const steps = [challenge.startId, ...path.map((s) => s.toId)]
 
   return (
-    <div className="rounded-2xl border border-white/8 bg-white/3 p-4 space-y-2">
+    <div className="rounded-2xl border border-ink/10 bg-white/75 p-4 space-y-2 shadow-glow">
       {steps.map((id, i) => {
         const isLast = i === steps.length - 1
         const name = artistName(artists, id)
@@ -176,14 +169,14 @@ function PathDisplay({
         return (
           <div key={i}>
             <div
-              className={`text-sm font-medium ${isLast ? 'text-ember' : i === 0 ? 'text-gold/70' : 'text-white/80'}`}
+              className={`text-sm font-medium ${isLast ? 'text-ember' : i === 0 ? 'text-gold/80' : 'text-ink/85'}`}
             >
               {name}
             </div>
             {songTitle && (
               <div className="flex items-center gap-1.5 ml-3 mt-0.5">
                 <span className="text-gold/30 text-xs">v</span>
-                <span className="text-[10px] text-haze/40 italic">{songTitle}</span>
+                <span className="text-[10px] text-haze/80 italic">{songTitle}</span>
               </div>
             )}
           </div>
@@ -203,7 +196,7 @@ function OptimalDisplay({
   graph: Graph
 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/2 p-4 space-y-2 opacity-60">
+    <div className="rounded-2xl border border-ink/10 bg-paper/80 p-4 space-y-2 opacity-75">
       {artistIds.map((id, i) => {
         const isLast = i === artistIds.length - 1
         const name = artistName(artists, id)
@@ -212,14 +205,14 @@ function OptimalDisplay({
         return (
           <div key={i}>
             <div
-              className={`text-sm font-medium ${isLast ? 'text-ember/60' : i === 0 ? 'text-gold/50' : 'text-white/60'}`}
+              className={`text-sm font-medium ${isLast ? 'text-ember/70' : i === 0 ? 'text-gold/70' : 'text-ink/70'}`}
             >
               {name}
             </div>
             {song && (
               <div className="flex items-center gap-1.5 ml-3 mt-0.5">
                 <span className="text-gold/20 text-xs">v</span>
-                <span className="text-[10px] text-haze/30 italic">{song.title}</span>
+                <span className="text-[10px] text-haze/70 italic">{song.title}</span>
               </div>
             )}
           </div>

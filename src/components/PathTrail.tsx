@@ -24,8 +24,8 @@ export function PathTrail({ startId, path, artists, currentId }: PathTrailProps)
           <div key={i} className="flex items-start">
             {/* Arrow + song label */}
             <div className="flex flex-col items-center justify-center px-1 pt-2">
-              <span className="text-gold/60 text-base leading-none">{'->'}</span>
-              <span className="text-[9px] text-haze/40 mt-0.5 max-w-[60px] text-center leading-tight truncate">
+              <span className="text-gold/70 text-base leading-none">{'->'}</span>
+              <span className="text-[9px] text-haze/80 mt-0.5 max-w-[60px] text-center leading-tight truncate">
                 {step.song.title}
               </span>
             </div>
@@ -54,9 +54,9 @@ function TrailNode({
     <div
       className={`
         flex flex-col items-center justify-center rounded-xl border px-2 py-1.5 min-w-[60px] max-w-[80px]
-        ${isStart ? 'border-gold/30 bg-gold/8 text-gold/70' : ''}
-        ${isActive ? 'border-gold bg-gold/15 text-gold shadow-[0_0_8px_rgba(212,169,61,0.3)]' : ''}
-        ${!isStart && !isActive ? 'border-white/10 bg-white/5 text-white/40' : ''}
+        ${isStart ? 'border-gold/30 bg-gold/10 text-gold/80' : ''}
+        ${isActive ? 'border-gold bg-gold/15 text-gold shadow-[0_0_8px_rgba(183,142,30,0.22)]' : ''}
+        ${!isStart && !isActive ? 'border-ink/10 bg-white/75 text-ink/65' : ''}
       `}
     >
       <span className="text-[10px] font-medium leading-tight text-center">{label}</span>

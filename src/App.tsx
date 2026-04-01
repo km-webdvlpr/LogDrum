@@ -11,12 +11,14 @@ import { ResultScreen } from './components/ResultScreen'
 import { ToastBanner } from './components/ToastBanner'
 import { HowToPlayPanel } from './components/HowToPlayPanel'
 import { PlayerLedger } from './components/PlayerLedger'
+import { getCopy, type Locale } from './content/copy'
 import type { Artist, Song, Challenge } from './types/wela'
 
 const artists = artistsData as Artist[]
 const songs = songsData as Song[]
 
 type PanelView = 'rules' | 'ledger' | null
+const LOCALE_STORAGE_KEY = 'wela-locale'
 
 function useSADate() {
   const [dateKey, setDateKey] = useState(getSADateKey)
@@ -35,6 +37,13 @@ export default function App() {
   const dateKey = useSADate()
   const [practiceMode, setPracticeMode] = useState(false)
   const [panelView, setPanelView] = useState<PanelView>('rules')
+  const [locale, setLocale] = useState<Locale>(getStoredLocale)
+  const copy = useMemo(() => getCopy(locale), [locale])
+
+  useEffect(() => {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale)
+    document.documentElement.lang = locale === 'zu' ? 'zu' : 'en'
+  }, [locale])
 
   const challenge = useMemo<Challenge>(() => {
     if (practiceMode) {
@@ -87,7 +96,7 @@ export default function App() {
   }, [state.status, state.path, challenge, historyEntries])
 
   return (
-    <div className="min-h-screen bg-[#060606] text-white flex flex-col max-w-[480px] mx-auto relative overflow-hidden">
+    <div className="min-h-screen bg-paper text-ink flex flex-col max-w-[480px] mx-auto relative overflow-hidden">
       <div className="noise-overlay" />
       <div className="stage-glow" />
 
@@ -95,57 +104,98 @@ export default function App() {
         <header className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
           <div>
             <span className="font-display text-4xl tracking-[0.2em] text-gold">WELA</span>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-haze/35 mt-1">
-              Amapiano artist connection game
+            <p className="text-[10px] uppercase tracking-[0.18em] text-haze/80 mt-1">
+              {copy.header.tagline}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-haze/35">
-              {practiceMode ? 'practice run' : 'daily route'}
-            </p>
-            <span className="text-haze/50 text-xs tabular-nums">
-              {practiceMode ? 'fresh every 2 min' : dateKey}
-            </span>
+          <div className="text-right space-y-2">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-haze/80">
+                {practiceMode ? copy.header.practiceRun : copy.header.dailyRoute}
+              </p>
+              <span className="text-haze/70 text-xs tabular-nums">
+                {practiceMode ? copy.header.freshEveryTwoMinutes : dateKey}
+              </span>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] uppercase tracking-[0.18em] text-haze/65">
+                {copy.header.languageToggle}
+              </p>
+              <div className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-white/70 p-1 shadow-glow backdrop-blur-sm">
+                <button
+                  onClick={() => setLocale('en')}
+                  className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                    locale === 'en'
+                      ? 'bg-gold/15 text-ink border border-gold/30'
+                      : 'text-haze/75'
+                  }`}
+                >
+                  {copy.locale.english}
+                </button>
+                <button
+                  onClick={() => setLocale('zu')}
+                  className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                    locale === 'zu'
+                      ? 'bg-ember/12 text-ember border border-ember/25'
+                      : 'text-haze/75'
+                  }`}
+                >
+                  {copy.locale.zulu}
+                </button>
+              </div>
+            </div>
           </div>
         </header>
 
         <div className="px-5 pb-4 shrink-0 space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-haze/35">
-              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
-                {practiceMode ? 'practice' : 'daily'}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-haze/80">
+              <span className="rounded-full border border-ink/10 bg-white/70 px-2.5 py-1 shadow-glow">
+                {practiceMode ? copy.header.practice : copy.header.daily}
               </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 tabular-nums">
-                {state.path.length} hops used
+              <span className="rounded-full border border-ink/10 bg-white/70 px-2.5 py-1 tabular-nums shadow-glow">
+                {copy.header.hopsUsed(state.path.length)}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPanelView((current) => (current === 'rules' ? null : 'rules'))}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-haze/70 transition-colors hover:border-gold/30 hover:text-haze"
+                className={`rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                  panelView === 'rules'
+                    ? 'border-gold/35 bg-gold/12 text-ink'
+                    : 'border-ink/10 bg-white/70 text-haze/75 hover:border-gold/25 hover:text-ink'
+                }`}
               >
-                Rules
+                {copy.header.rules}
               </button>
               <button
                 onClick={() => setPanelView((current) => (current === 'ledger' ? null : 'ledger'))}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-haze/70 transition-colors hover:border-gold/30 hover:text-haze"
+                className={`rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                  panelView === 'ledger'
+                    ? 'border-ember/25 bg-ember/10 text-ember'
+                    : 'border-ink/10 bg-white/70 text-haze/75 hover:border-ember/20 hover:text-ink'
+                }`}
               >
-                Ledger
+                {copy.header.history}
               </button>
             </div>
           </div>
 
-          <p className="text-[10px] text-haze/35 uppercase tracking-[0.15em]">
-            Bridge the connection
+          <p className="text-[10px] text-haze/80 uppercase tracking-[0.15em]">
+            {copy.header.connectionPrompt}
           </p>
-          <div className="flex items-center gap-3 rounded-[28px] border border-white/8 bg-white/[0.03] px-3 py-3 shadow-glow backdrop-blur-sm">
-            <div className="flex-1 rounded-2xl border border-gold/30 bg-gold/8 px-3 py-2.5 text-center">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-gold/50 mb-1">Start</p>
+          <div className="flex items-center gap-3 rounded-[28px] border border-ink/10 bg-white/70 px-3 py-3 shadow-glow backdrop-blur-sm">
+            <div className="flex-1 rounded-2xl border border-gold/30 bg-gold/10 px-3 py-2.5 text-center">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-gold/70 mb-1">
+                {copy.header.start}
+              </p>
               <p className="text-gold text-sm font-semibold leading-tight">{startArtist.name}</p>
             </div>
-            <span className="text-haze/25 text-lg shrink-0">{'->'}</span>
-            <div className="flex-1 rounded-2xl border border-ember/40 bg-ember/8 px-3 py-2.5 text-center">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-ember/50 mb-1">Target</p>
+            <span className="text-haze/45 text-lg shrink-0">{'->'}</span>
+            <div className="flex-1 rounded-2xl border border-ember/30 bg-ember/10 px-3 py-2.5 text-center">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-ember/70 mb-1">
+                {copy.header.target}
+              </p>
               <p className="text-ember text-sm font-semibold leading-tight">{destArtist.name}</p>
             </div>
           </div>
@@ -153,20 +203,22 @@ export default function App() {
           {isSolvedDaily ? (
             <ToastBanner
               tone="success"
-              message="Today's daily route is already solved on this device. You can review it below or jump into practice mode."
+              message={copy.toasts.solvedDaily}
             />
           ) : isDaily ? (
             <ToastBanner
-              message="One shared-song route updates each day at midnight South Africa time. Practice mode stays separate from the daily result."
+              message={copy.toasts.dailyInfo}
             />
           ) : (
             <ToastBanner
-              message="Practice mode generates short fresh routes and never overwrites your saved daily result."
+              message={copy.toasts.practiceInfo}
             />
           )}
 
-          {panelView === 'rules' ? <HowToPlayPanel /> : null}
-          {panelView === 'ledger' ? <PlayerLedger artists={artists} entries={visibleHistory} /> : null}
+          {panelView === 'rules' ? <HowToPlayPanel copy={copy} /> : null}
+          {panelView === 'ledger' ? (
+            <PlayerLedger artists={artists} entries={visibleHistory} copy={copy} />
+          ) : null}
         </div>
 
         <div className="shrink-0">
@@ -184,6 +236,7 @@ export default function App() {
             path={state.path}
             artists={artists}
             graph={graph}
+            copy={copy}
             onPractice={() => setPracticeMode((p) => !p)}
             solvedFromHistory={Boolean(savedDailyEntry && !practiceMode)}
           />
@@ -194,6 +247,7 @@ export default function App() {
             currentId={state.currentId}
             destinationId={challenge.destinationId}
             pathIds={pathIds}
+            copy={copy}
             onMove={makeMove}
           />
         )}
@@ -202,9 +256,9 @@ export default function App() {
           <div className="shrink-0 px-5 pb-5 pt-1">
             <button
               onClick={undo}
-              className="text-haze/30 text-xs hover:text-haze/60 transition-colors"
+              className="text-haze/70 text-xs hover:text-ember transition-colors"
             >
-              {'<- undo last hop'}
+              {copy.header.undoLastHop}
             </button>
           </div>
         )}
@@ -215,4 +269,10 @@ export default function App() {
 
 function stateKeyForHistory(challengeDate: string, practiceMode: boolean): string {
   return `${challengeDate}:${practiceMode}`
+}
+
+function getStoredLocale(): Locale {
+  if (typeof window === 'undefined') return 'en'
+  const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+  return saved === 'zu' ? 'zu' : 'en'
 }
