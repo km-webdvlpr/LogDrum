@@ -72,7 +72,7 @@ export interface CandidatePair {
   distance: number
 }
 
-// Find all reachable pairs within a distance range — used for challenge seeding
+// Find all reachable pairs within a distance range; used for challenge seeding
 export function findPairsInRange(
   graph: Graph,
   minDist: number,

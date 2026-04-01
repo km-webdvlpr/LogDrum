@@ -8,12 +8,12 @@ export interface Song {
   id: string
   title: string
   year: number
-  artists: string[] // array of Artist ids — ALL on the track, flat
+  artists: string[] // Array of Artist IDs; every credited artist on the track.
 }
 
 export interface Graph {
   adjacency: Map<string, Set<string>>
-  edges: Map<string, Song[]> // key: "idA:idB" sorted — value: songs connecting them
+  edges: Map<string, Song[]> // Key "idA:idB"; sorted pair, value is connecting songs.
 }
 
 export interface Challenge {
@@ -42,7 +42,7 @@ export type GameAction =
   | { type: 'MOVE'; toId: string; song: Song }
   | { type: 'UNDO' }
   | { type: 'RESET' }
-  | { type: 'LOAD_CHALLENGE'; challenge: Challenge }
+  | { type: 'LOAD_CHALLENGE'; challenge: Challenge; savedEntry?: HistoryEntry | null }
 
 export interface HistoryEntry {
   date: string

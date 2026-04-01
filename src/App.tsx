@@ -4,9 +4,11 @@ import songsData from './data/songs.json'
 import { buildGraph } from './engine/graph'
 import { getDailyChallenge, getSADateKey } from './engine/challenge'
 import { useGame } from './store/useGame'
+import { getTodayEntry } from './store/history'
 import { ArtistGrid } from './components/ArtistGrid'
 import { PathTrail } from './components/PathTrail'
 import { ResultScreen } from './components/ResultScreen'
+import { ToastBanner } from './components/ToastBanner'
 import type { Artist, Song, Challenge } from './types/wela'
 
 const artists = artistsData as Artist[]
@@ -37,36 +39,86 @@ export default function App() {
     return getDailyChallenge(graph, dateKey)
   }, [graph, dateKey, practiceMode])
 
-  const { state, makeMove, undo } = useGame(graph, challenge)
+  const savedDailyEntry = useMemo(() => {
+    if (practiceMode) return null
+    const entry = getTodayEntry(dateKey)
+    if (!entry) return null
+    const isSameChallenge =
+      entry.startId === challenge.startId &&
+      entry.destinationId === challenge.destinationId &&
+      entry.date === challenge.date
+    return isSameChallenge ? entry : null
+  }, [practiceMode, dateKey, challenge])
+
+  const { state, makeMove, undo } = useGame(graph, challenge, savedDailyEntry)
 
   const startArtist = artists.find((a) => a.id === challenge.startId)!
   const destArtist = artists.find((a) => a.id === challenge.destinationId)!
   const pathIds = new Set(state.path.map((s) => s.toId))
+  const isDaily = !practiceMode
+  const isSolvedDaily = isDaily && state.status === 'solved'
 
   return (
-    <div className="min-h-screen bg-[#060606] text-white flex flex-col max-w-[480px] mx-auto relative">
+    <div className="min-h-screen bg-[#060606] text-white flex flex-col max-w-[480px] mx-auto relative overflow-hidden">
       <div className="noise-overlay" />
+      <div className="stage-glow" />
 
       <header className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
-        <span className="font-display text-4xl tracking-[0.2em] text-gold">WELA</span>
-        <span className="text-haze/30 text-xs tabular-nums">
-          {practiceMode ? 'practice' : dateKey}
-        </span>
+        <div>
+          <span className="font-display text-4xl tracking-[0.2em] text-gold">WELA</span>
+          <p className="text-[10px] uppercase tracking-[0.18em] text-haze/35 mt-1">
+            Amapiano artist connection game
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-haze/35">
+            {practiceMode ? 'practice run' : 'daily route'}
+          </p>
+          <span className="text-haze/50 text-xs tabular-nums">
+            {practiceMode ? 'fresh every 2 min' : dateKey}
+          </span>
+        </div>
       </header>
 
-      <div className="px-5 pb-4 shrink-0">
-        <p className="text-[10px] text-haze/35 uppercase tracking-[0.15em] mb-2">
+      <div className="px-5 pb-4 shrink-0 space-y-3">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-haze/35">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+            {practiceMode ? 'practice' : 'daily'}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 tabular-nums">
+            {state.path.length} hops used
+          </span>
+        </div>
+
+        <p className="text-[10px] text-haze/35 uppercase tracking-[0.15em]">
           Bridge the connection
         </p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 rounded-[28px] border border-white/8 bg-white/[0.03] px-3 py-3 shadow-glow backdrop-blur-sm">
           <div className="flex-1 rounded-2xl border border-gold/30 bg-gold/8 px-3 py-2.5 text-center">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-gold/50 mb-1">Start</p>
             <p className="text-gold text-sm font-semibold leading-tight">{startArtist.name}</p>
           </div>
-          <span className="text-haze/25 text-lg shrink-0">→</span>
+          <span className="text-haze/25 text-lg shrink-0">{'->'}</span>
           <div className="flex-1 rounded-2xl border border-ember/40 bg-ember/8 px-3 py-2.5 text-center">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-ember/50 mb-1">Target</p>
             <p className="text-ember text-sm font-semibold leading-tight">{destArtist.name}</p>
           </div>
         </div>
+
+        {isSolvedDaily ? (
+          <ToastBanner
+            tone="success"
+            message="Today's daily route is already solved on this device. You can review it below or jump into practice mode."
+          />
+        ) : isDaily ? (
+          <ToastBanner
+            message="One shared-song route updates each day at midnight South Africa time. Practice mode stays separate from the daily result."
+          />
+        ) : (
+          <ToastBanner
+            message="Practice mode generates short fresh routes and never overwrites your saved daily result."
+          />
+        )}
       </div>
 
       <div className="shrink-0">
@@ -85,6 +137,7 @@ export default function App() {
           artists={artists}
           graph={graph}
           onPractice={() => setPracticeMode((p) => !p)}
+          solvedFromHistory={Boolean(savedDailyEntry && !practiceMode)}
         />
       ) : (
         <ArtistGrid
@@ -103,7 +156,7 @@ export default function App() {
             onClick={undo}
             className="text-haze/30 text-xs hover:text-haze/60 transition-colors"
           >
-            ← undo last hop
+            {'<- undo last hop'}
           </button>
         </div>
       )}

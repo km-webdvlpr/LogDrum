@@ -2,34 +2,39 @@
 
 ## 1. Product Overview
 
-LogDrum is a non-commercial daily Amapiano discovery game where players guess the "Song of the Day" through progressive clues. The product is positioned as a cultural web experience and portfolio case study rather than a commercial entertainment platform. Its role is to celebrate South African music culture through interactive play, while also demonstrating thoughtful product design, visual identity work, and front-end engineering craft.
+WELA is a non-commercial daily Amapiano connection game. It is designed as a cultural web experience and portfolio-quality product that celebrates artist collaboration within the genre.
+
+The repository remains named `LogDrum`, but the product being built and presented is `WELA`.
 
 ## 2. Problem Statement
 
-Amapiano has grown from a local South African movement into a globally recognized genre, yet most discovery experiences remain passive. Users typically encounter tracks through streaming playlists, social clips, DJ sets, or algorithmic recommendations. There are relatively few interactive digital experiences that invite users to engage with the genre actively, test their familiarity, or learn contextual details about songs and artists in a playful way.
+Amapiano discovery is usually passive. Listeners encounter artists through playlists, sets, short clips, or recommendation feeds, but there are few interactive products that help people explore how artists are connected to one another through collaboration.
 
 ## 3. Opportunity
 
-A daily puzzle format offers a familiar behavioral loop that encourages repeat engagement without requiring a large content footprint. Applied to Amapiano, this format creates an opportunity to:
+WELA turns artist collaboration into a playable daily ritual. This creates an opportunity to:
 
-- Turn music discovery into an active, participatory experience
-- Introduce users to artists, collaborators, and substyles through lightweight gameplay
-- Present South African music culture in a way that feels celebratory, distinctive, and portfolio-worthy
+- Encourage active exploration of Amapiano relationships
+- Reward familiarity with artists, features, and recurring collaborations
+- Create a memorable cultural product with a clear identity
+- Showcase product, design, and frontend craft through a focused game experience
 
 ## 4. Goals
 
-- Build a functional daily cultural puzzle with clear replay boundaries
-- Showcase product thinking, interaction design, and front-end execution
-- Produce a polished, portfolio-quality web application with supporting documentation
+- Build a polished daily puzzle with strong replay value
+- Keep the experience simple enough to understand instantly on mobile
+- Create a product identity that is clearly distinct from generic word or trivia clones
+- Maintain a lightweight, reliable architecture that can ship as a static site
 
 ## 5. Target Users
 
-- Existing Amapiano fans who enjoy testing their knowledge of the genre
-- Casual puzzle players looking for a fresh themed daily challenge
-- Global listeners who are curious about South African music and want a more interactive entry point
+- Amapiano listeners who know artists and collaborators well
+- Casual daily puzzle players looking for a fresh mechanic
+- People outside the scene who want a playful entry point into the genre
 
 ## 6. Non-Goals
 
-- No monetization, subscriptions, or ad-supported growth mechanics
-- No self-hosted streaming, music previews, or raw audio distribution
-- No use of copyrighted lyrics, scraped cover art, or unlicensed branded assets
+- No backend-heavy product operations
+- No accounts, streak economies, or complex live-service features
+- No streaming integration as a core mechanic
+- No reliance on copyrighted lyrics, cover art scraping, or unlicensed media

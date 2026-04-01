@@ -1,10 +1,25 @@
 import { useReducer, useEffect, useRef } from 'react'
-import type { GameState, GameAction, Challenge, Song } from '../types/wela'
+import type { GameState, GameAction, Challenge, Song, HistoryEntry } from '../types/wela'
 import type { Graph } from '../types/wela'
 import { canConnect, getSongsBetween } from '../engine/graph'
 import { saveResult } from './history'
 
-function initState(challenge: Challenge): GameState {
+function buildState(challenge: Challenge, savedEntry?: HistoryEntry | null): GameState {
+  if (
+    savedEntry &&
+    savedEntry.date === challenge.date &&
+    savedEntry.startId === challenge.startId &&
+    savedEntry.destinationId === challenge.destinationId
+  ) {
+    const lastStep = savedEntry.path[savedEntry.path.length - 1]
+    return {
+      status: 'solved',
+      challenge,
+      currentId: lastStep?.toId ?? challenge.startId,
+      path: savedEntry.path,
+    }
+  }
+
   return {
     status: 'playing',
     challenge,
@@ -47,28 +62,38 @@ function reducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'RESET':
-      return initState(state.challenge)
+      return buildState(state.challenge)
 
     case 'LOAD_CHALLENGE':
-      return initState(action.challenge)
+      return buildState(action.challenge, action.savedEntry)
 
     default:
       return state
   }
 }
 
-export function useGame(graph: Graph, challenge: Challenge) {
-  const [state, dispatch] = useReducer(reducer, challenge, initState)
+export function useGame(
+  graph: Graph,
+  challenge: Challenge,
+  savedEntry?: HistoryEntry | null
+) {
+  const [state, dispatch] = useReducer(
+    reducer,
+    { challenge, savedEntry },
+    ({ challenge: initialChallenge, savedEntry: initialEntry }) =>
+      buildState(initialChallenge, initialEntry)
+  )
 
   // Reset state when challenge changes (daily date flip or practice toggle)
   const challengeKey = `${challenge.startId}:${challenge.destinationId}:${challenge.date}`
-  const prevKeyRef = useRef(challengeKey)
+  const prevKeyRef = useRef(`${challengeKey}:${savedEntry?.timestamp ?? 'none'}`)
   useEffect(() => {
-    if (prevKeyRef.current !== challengeKey) {
-      prevKeyRef.current = challengeKey
-      dispatch({ type: 'LOAD_CHALLENGE', challenge })
+    const nextKey = `${challengeKey}:${savedEntry?.timestamp ?? 'none'}`
+    if (prevKeyRef.current !== nextKey) {
+      prevKeyRef.current = nextKey
+      dispatch({ type: 'LOAD_CHALLENGE', challenge, savedEntry })
     }
-  }, [challengeKey])
+  }, [challengeKey, challenge, savedEntry])
 
   // Persist when solved
   useEffect(() => {
@@ -83,15 +108,14 @@ export function useGame(graph: Graph, challenge: Challenge) {
         timestamp: Date.now(),
       })
     }
-  }, [state.status])
+  }, [state.status, state.challenge, state.path])
 
   function makeMove(toId: string) {
     if (state.status === 'solved') return
     if (!canConnect(graph, state.currentId, toId)) return
     const songs = getSongsBetween(graph, state.currentId, toId)
     if (songs.length === 0) return
-    // Pick the earliest song for the displayed connection
-    const song: Song = songs.sort((a, b) => a.year - b.year)[0]
+    const song: Song = [...songs].sort((a, b) => a.year - b.year)[0]
     dispatch({ type: 'MOVE', toId, song })
   }
 

@@ -24,7 +24,7 @@ export function PathTrail({ startId, path, artists, currentId }: PathTrailProps)
           <div key={i} className="flex items-start">
             {/* Arrow + song label */}
             <div className="flex flex-col items-center justify-center px-1 pt-2">
-              <span className="text-gold/60 text-base leading-none">→</span>
+              <span className="text-gold/60 text-base leading-none">{'->'}</span>
               <span className="text-[9px] text-haze/40 mt-0.5 max-w-[60px] text-center leading-tight truncate">
                 {step.song.title}
               </span>

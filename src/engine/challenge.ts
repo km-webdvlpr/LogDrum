@@ -10,7 +10,7 @@ function hashString(s: string): number {
   return Math.abs(h)
 }
 
-// Linear congruential seeded random — returns [0, 1)
+// Linear congruential seeded random; returns [0, 1)
 function seededRng(seed: number) {
   let s = seed
   return (): number => {

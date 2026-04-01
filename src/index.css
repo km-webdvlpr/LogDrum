@@ -7,7 +7,10 @@
 :root {
   color-scheme: dark;
   font-family: 'Sora', sans-serif;
-  background: #060606;
+  background:
+    radial-gradient(circle at top, rgba(212, 169, 61, 0.14), transparent 30%),
+    radial-gradient(circle at 80% 18%, rgba(255, 107, 26, 0.12), transparent 26%),
+    #060606;
 }
 
 * { box-sizing: border-box; }
@@ -18,13 +21,15 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #060606;
+  background:
+    radial-gradient(circle at top, rgba(212, 169, 61, 0.14), transparent 30%),
+    radial-gradient(circle at 80% 18%, rgba(255, 107, 26, 0.12), transparent 26%),
+    #060606;
   -webkit-tap-highlight-color: transparent;
 }
 
-button, input { font: inherit; }
+button, input, textarea { font: inherit; }
 
-/* Grid noise texture */
 .noise-overlay {
   position: fixed;
   inset: 0;
@@ -38,7 +43,17 @@ button, input { font: inherit; }
   z-index: 0;
 }
 
-/* Ensure content sits above noise */
+.stage-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 30%, rgba(212, 169, 61, 0.11), transparent 20%),
+    radial-gradient(circle at 82% 72%, rgba(255, 107, 26, 0.08), transparent 24%);
+  opacity: 0.9;
+  z-index: 0;
+}
+
 header, main, div[class*='px-'] {
   position: relative;
   z-index: 1;

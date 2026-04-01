@@ -1,22 +1,32 @@
 # WELA
 
-A daily Amapiano artist-connection game. Navigate from one artist to another through shared songs, in as few hops as possible.
+WELA is a daily Amapiano artist-connection game. Each challenge asks the player to travel from one artist to another through shared songs, using as few hops as possible.
 
-Built as a non-commercial portfolio piece — no backend, no accounts, no streaks.
+This repository is still named `LogDrum`, but the product inside it is `WELA`.
 
-## How It Works
+## Product Direction
 
-- One new challenge is generated each day using the South Africa date (`Africa/Johannesburg`)
-- Start at one artist, reach the destination by hopping through artists who share songs
-- Tap a valid artist to move — the connecting song is shown at each step
-- Your path and hop count are saved locally; compare against the optimal route
+- `WELA` is the active product direction
+- The game is fully client-side
+- There is no backend, auth, account system, or streak economy
+- Daily challenges are generated using the South Africa date (`Africa/Johannesburg`)
 
-## Stack
+## Gameplay
 
-- React 18 + TypeScript + Vite 6 + Tailwind CSS 3
-- Pure graph engine (BFS pathfinding, adjacency + edge maps)
-- Deterministic daily seeding via LCG hash from SA timezone date
-- No backend — all state in localStorage
+- Start from one artist and reach the target artist
+- Each valid move must be supported by a shared song
+- The connecting song is shown as part of the route
+- Your solved path is stored locally so you can compare it with the optimal path
+- A practice mode lets you play fresh routes outside the daily challenge
+
+## Tech Stack
+
+- React 18
+- TypeScript
+- Vite 6
+- Tailwind CSS 3
+- Local JSON datasets for artists and songs
+- Graph-based pathfinding with deterministic daily challenge seeding
 
 ## Local Development
 
@@ -34,5 +44,7 @@ npm run preview
 
 ## Deployment
 
-Deployed to GitHub Pages via GitHub Actions on push to `main`.
-Live at: https://km-webdvlpr.github.io/LogDrum/
+GitHub Pages is still published from this repository, so the production base path remains `/LogDrum/`.
+
+- Repository: https://github.com/km-webdvlpr/LogDrum
+- Live site: https://km-webdvlpr.github.io/LogDrum/

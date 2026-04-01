@@ -11,5 +11,9 @@ export function ToastBanner({ tone = 'info', message }: ToastBannerProps) {
         ? 'border-ember/25 bg-ember/10 text-ember'
         : 'border-white/10 bg-white/5 text-haze/75'
 
-  return <p className={`rounded-2xl border px-4 py-3 text-sm ${cls}`}>{message}</p>
+  return (
+    <p className={`rounded-2xl border px-4 py-3 text-sm leading-relaxed ${cls}`}>
+      {message}
+    </p>
+  )
 }

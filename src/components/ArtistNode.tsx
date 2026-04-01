@@ -45,7 +45,7 @@ export function ArtistNode({ artist, nodeState, onClick }: ArtistNodeProps) {
         transition-transform duration-150 select-none
         ${styles[nodeState]}
       `}
-      aria-label={`${artist.name}${nodeState === 'destination' ? ' — destination' : ''}${nodeState === 'current' ? ' — current position' : ''}`}
+      aria-label={`${artist.name}${nodeState === 'destination' ? ' - destination' : ''}${nodeState === 'current' ? ' - current position' : ''}`}
     >
       {nodeState === 'destination' && (
         <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[9px] text-ember/80 uppercase tracking-widest">
