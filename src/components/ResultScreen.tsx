@@ -81,7 +81,7 @@ export function ResultScreen({
         )}
       </div>
 
-      <div className="mb-6 text-center">
+      <div className="mb-6 rounded-[30px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.74),rgba(248,242,227,0.7))] px-4 py-5 text-center shadow-glow backdrop-blur-sm">
         <p className="font-display text-5xl tracking-widest text-gold mb-1">
           {hops}
           <span className="text-2xl text-gold/50 ml-1">
@@ -113,17 +113,17 @@ export function ResultScreen({
         </div>
       )}
 
-      <div className="flex flex-col gap-3 mt-6">
+      <div className="mt-6 flex flex-col gap-3">
         <button
           onClick={handleShare}
-          className="w-full rounded-2xl border border-gold/30 bg-gold/10 py-3.5 text-gold text-sm font-semibold tracking-wide active:scale-98 transition-transform shadow-glow"
+          className="w-full rounded-[22px] border border-gold/30 bg-[linear-gradient(135deg,rgba(183,142,30,0.18),rgba(255,255,255,0.84))] py-3.5 text-gold text-sm font-semibold tracking-wide active:scale-[0.98] transition-transform shadow-glow"
         >
           {shareState === 'copied' ? copy.result.copiedToClipboard : copy.result.shareResult}
         </button>
 
         <button
           onClick={onPractice}
-          className="w-full rounded-2xl border border-ink/10 bg-white/75 py-3 text-ink/80 text-sm active:scale-98 transition-transform"
+          className="w-full rounded-[22px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(248,242,227,0.8))] py-3 text-ink/80 text-sm active:scale-[0.98] transition-transform"
         >
           {isDaily ? copy.result.openPractice : copy.result.returnToDaily}
         </button>
@@ -161,7 +161,7 @@ function PathDisplay({
   const steps = [challenge.startId, ...path.map((s) => s.toId)]
 
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white/75 p-4 space-y-2 shadow-glow">
+    <div className="space-y-2 rounded-[24px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.8),rgba(248,242,227,0.74))] p-4 shadow-glow backdrop-blur-sm">
       {steps.map((id, i) => {
         const isLast = i === steps.length - 1
         const name = artistName(artists, id)
@@ -196,7 +196,7 @@ function OptimalDisplay({
   graph: Graph
 }) {
   return (
-    <div className="rounded-2xl border border-ink/10 bg-paper/80 p-4 space-y-2 opacity-75">
+    <div className="space-y-2 rounded-[24px] border border-ink/10 bg-paper/80 p-4 opacity-75">
       {artistIds.map((id, i) => {
         const isLast = i === artistIds.length - 1
         const name = artistName(artists, id)

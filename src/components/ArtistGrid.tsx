@@ -42,7 +42,7 @@ export function ArtistGrid({
 
   return (
     <div className="flex-1 px-4 pb-4 overflow-y-auto">
-      <div className="mb-3 rounded-2xl border border-ink/10 bg-white/75 px-3 py-2.5 shadow-glow">
+      <div className="mb-3 rounded-[24px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,242,227,0.84))] px-3.5 py-3 shadow-glow backdrop-blur-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-1">
@@ -64,7 +64,7 @@ export function ArtistGrid({
       <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-3">
         {copy.grid.tapConnectedArtist}
       </p>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2.5">
         {artists.map((artist) => {
           const ns = resolveState(artist)
           return (
