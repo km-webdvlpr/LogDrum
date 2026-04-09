@@ -27,7 +27,7 @@ export function PlayerLedger({ artists, entries, copy }: PlayerLedgerProps) {
           <p className="font-display text-3xl tracking-[0.16em] text-gold">{copy.ledger.title}</p>
           <p className="mt-1 text-sm leading-6 text-ink/75">{copy.ledger.intro}</p>
         </div>
-        <span className="rounded-full border border-gold/20 bg-gold/10 px-3 py-1 text-xs uppercase tracking-[0.18em] text-gold">
+        <span className="rounded-full border border-gold/20 bg-gold/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.18em] text-gold">
           {copy.ledger.routeCount(dailyEntries.length)}
         </span>
       </div>
@@ -41,7 +41,7 @@ export function PlayerLedger({ artists, entries, copy }: PlayerLedgerProps) {
       <div className="mt-4 rounded-[24px] border border-ink/10 bg-paper/80 p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-haze/70">{copy.ledger.recentRoutes}</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">{copy.ledger.recentRoutes}</p>
             <p className="text-sm text-haze/80">{copy.ledger.recentSubtitle}</p>
           </div>
         </div>
@@ -53,11 +53,11 @@ export function PlayerLedger({ artists, entries, copy }: PlayerLedgerProps) {
             {dailyEntries.slice(0, 6).map((entry) => (
               <div
                 key={`${entry.date}-${entry.startId}-${entry.destinationId}`}
-                className="rounded-3xl border border-ink/10 bg-white/70 p-4"
+                className="rounded-3xl border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,242,227,0.74))] p-4"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-haze/70">{entry.date}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-haze/70">{entry.date}</p>
                     <p className="mt-1 text-base font-semibold text-ink">
                       {copy.ledger.routeBetween(
                         artistName(artists, entry.startId),
@@ -66,10 +66,10 @@ export function PlayerLedger({ artists, entries, copy }: PlayerLedgerProps) {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-gold tabular-nums">
+                    <p className="font-mono text-sm font-semibold text-gold tabular-nums">
                       {copy.ledger.hops(entry.hops)}
                     </p>
-                    <p className="text-xs uppercase tracking-[0.18em] text-haze/70">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-haze/70">
                       {copy.ledger.optimal(entry.optimal)}
                     </p>
                   </div>
@@ -86,7 +86,7 @@ export function PlayerLedger({ artists, entries, copy }: PlayerLedgerProps) {
 function LedgerStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-[22px] border border-ink/10 bg-paper/75 px-3 py-3">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-haze/70">{label}</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">{label}</p>
       <p className="mt-2 font-display text-2xl tracking-[0.08em] text-ink">{value}</p>
     </div>
   )

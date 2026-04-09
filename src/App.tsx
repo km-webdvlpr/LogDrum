@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import artistsData from './data/artists.json'
 import songsData from './data/songs.json'
 import { ArtistGrid } from './components/ArtistGrid'
+import { MoveRevealCard } from './components/MoveRevealCard'
 import { PlayerLedger } from './components/PlayerLedger'
 import { ResultScreen } from './components/ResultScreen'
 import { ToastBanner } from './components/ToastBanner'
@@ -56,10 +57,13 @@ function HowToPlayModal({
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="font-display text-3xl tracking-[0.18em] text-gold">{copy.rules.title}</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-haze/70">
-              {copy.rules.subtitle}
-            </p>
+            <div className="mb-2 flex items-center gap-2">
+              <p className="font-display text-3xl tracking-[0.18em] text-gold">{copy.rules.title}</p>
+              <span className="rounded-full border border-gold/25 bg-gold/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-gold/75">
+                {copy.rules.badge}
+              </span>
+            </div>
+            <p className="text-sm leading-6 text-ink/78">{copy.rules.subtitle}</p>
           </div>
           <button
             onClick={onClose}
@@ -70,20 +74,34 @@ function HowToPlayModal({
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="mb-5 rounded-[24px] border border-ink/10 bg-white/60 px-4 py-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-haze/70">
+            {copy.header.routeLabel}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-ink/80">{copy.header.routePromise}</p>
+        </div>
+
+        <div className="space-y-3">
           {copy.rules.steps.map((step, index) => (
-            <div key={step} className="flex gap-3">
-              <span className="mt-0.5 w-5 shrink-0 font-display text-lg leading-none text-gold/45">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <p className="text-sm leading-relaxed text-ink/80">{step}</p>
+            <div
+              key={step}
+              className="rounded-[24px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,242,227,0.9))] px-4 py-4"
+            >
+              <div className="flex gap-3">
+                <span className="mt-0.5 w-7 shrink-0 font-mono text-sm leading-none tracking-[0.18em] text-gold/65">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <p className="text-sm leading-6 text-ink/80">{step}</p>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-5 rounded-2xl border border-ink/8 bg-white/55 px-4 py-3">
-          <p className="mb-1 text-xs font-semibold text-ink/65">{copy.rules.noteTitle}</p>
-          <p className="text-xs leading-relaxed text-haze/75">{copy.rules.noteBody}</p>
+        <div className="mt-5 rounded-[24px] border border-gold/15 bg-[linear-gradient(135deg,rgba(183,142,30,0.14),rgba(255,255,255,0.7),rgba(15,106,72,0.1))] px-4 py-4">
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/60">
+            {copy.rules.noteTitle}
+          </p>
+          <p className="text-sm leading-6 text-ink/78">{copy.rules.noteBody}</p>
         </div>
       </div>
     </div>
@@ -95,11 +113,13 @@ function PathStack({
   destId,
   path,
   artists: artistList,
+  copy,
 }: {
   startId: string
   destId: string
   path: PathStep[]
   artists: Artist[]
+  copy: ReturnType<typeof getCopy>
 }) {
   const steps = [startId, ...path.map((step) => step.toId)]
   const previousLength = useRef(0)
@@ -156,7 +176,7 @@ function PathStack({
               </span>
               {isStart && !isLast && (
                 <span className="shrink-0 text-[9px] uppercase tracking-[0.16em] text-gold/45">
-                  start
+                  {copy.header.start}
                 </span>
               )}
               {isDestination && isLast && (
@@ -172,16 +192,24 @@ function PathStack({
   )
 }
 
-function HopBadge({ count }: { count: number }) {
-  if (count === 0) return null
-
+function HopBadge({ count, copy }: { count: number; copy: ReturnType<typeof getCopy> }) {
   return (
-    <div className="flex justify-center pb-2">
-      <div className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/70 px-3 py-1 shadow-glow">
-        <span className="font-display text-sm leading-none tracking-widest text-gold">{count}</span>
-        <span className="text-[9px] uppercase tracking-[0.15em] text-haze/65">
-          {count === 1 ? 'hop' : 'hops'}
-        </span>
+    <div className="rounded-[28px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(244,237,221,0.9))] px-4 py-4 shadow-glow backdrop-blur-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">
+            {copy.grid.currentRoute}
+          </p>
+          <p className="text-base font-semibold text-gold">
+            {count === 0 ? copy.grid.routeReady : copy.grid.routeLocked(count)}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">
+            {copy.grid.hopsLabel}
+          </p>
+          <p className="font-mono text-lg font-semibold text-ink/80 tabular-nums">{count}</p>
+        </div>
       </div>
     </div>
   )
@@ -198,7 +226,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem(LOCALE_STORAGE_KEY, locale)
-    document.documentElement.lang = locale === 'zu' ? 'zu' : 'en'
+    document.documentElement.lang = locale
   }, [locale])
 
   const challenge = useMemo<Challenge>(() => {
@@ -234,6 +262,7 @@ export default function App() {
   const startArtist = artists.find((artist) => artist.id === challenge.startId)!
   const destinationArtist = artists.find((artist) => artist.id === challenge.destinationId)!
   const pathIds = new Set(state.path.map((step) => step.toId))
+  const latestMove = state.path[state.path.length - 1] ?? null
   const isSolved = state.status === 'solved'
   const isDaily = !practiceMode
   const isSolvedDaily = isDaily && isSolved
@@ -267,11 +296,11 @@ export default function App() {
         <header className="shrink-0 px-5 pb-2 pt-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <span className="font-display text-4xl tracking-[0.2em] text-gold">WELA</span>
-              <div className="mt-1 flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-display text-4xl tracking-[0.2em] text-gold">WELA</span>
                 <span
                   className={[
-                    'rounded-full border px-2 py-0.5 text-[9px] uppercase tracking-[0.18em]',
+                    'rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em]',
                     practiceMode
                       ? 'border-ember/25 bg-ember/8 text-ember/65'
                       : 'border-gold/25 bg-gold/8 text-gold/65',
@@ -285,6 +314,7 @@ export default function App() {
                   </span>
                 )}
               </div>
+              <p className="mt-2 max-w-[230px] text-sm leading-5 text-ink/72">{copy.header.tagline}</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -292,7 +322,7 @@ export default function App() {
                 <button
                   onClick={() => setLocale('en')}
                   className={[
-                    'rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] transition-colors',
+                    'rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.15em] transition-colors',
                     locale === 'en'
                       ? 'border border-gold/25 bg-gold/15 text-ink'
                       : 'text-haze/60 hover:text-ink',
@@ -303,13 +333,24 @@ export default function App() {
                 <button
                   onClick={() => setLocale('zu')}
                   className={[
-                    'rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] transition-colors',
+                    'rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.15em] transition-colors',
                     locale === 'zu'
                       ? 'border border-ember/20 bg-ember/12 text-ember'
                       : 'text-haze/60 hover:text-ink',
                   ].join(' ')}
                 >
                   ZU
+                </button>
+                <button
+                  onClick={() => setLocale('xh')}
+                  className={[
+                    'rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.15em] transition-colors',
+                    locale === 'xh'
+                      ? 'border border-ember/20 bg-ember/12 text-ember'
+                      : 'text-haze/60 hover:text-ink',
+                  ].join(' ')}
+                >
+                  XH
                 </button>
               </div>
 
@@ -338,25 +379,31 @@ export default function App() {
         </header>
 
         <div className="shrink-0 px-5 pb-4">
-          <p className="text-[10px] tabular-nums text-haze/45">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums text-haze/50">
             {practiceMode ? copy.header.freshEveryTwoMinutes : dateKey}
           </p>
         </div>
 
         <div className="shrink-0 px-5 pb-4">
-          <div className="relative rounded-3xl border border-ink/8 bg-white/60 px-4 py-4 shadow-glow backdrop-blur-sm">
+          <div className="relative overflow-hidden rounded-3xl border border-ink/8 bg-white/60 px-4 py-4 shadow-glow backdrop-blur-sm">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(183,142,30,0.55),transparent)]" />
             <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-haze/70">
-                {copy.header.connectionPrompt}
-              </p>
-              <span className="rounded-full border border-ink/10 bg-white/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-haze/75">
-                {copy.header.hopsUsed(state.path.length)}
-              </span>
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-haze/70">
+                  {copy.header.routeLabel}
+                </p>
+                <p className="mt-1 text-xs text-haze/72">{copy.header.connectionPrompt}</p>
+              </div>
+              <div className="text-right">
+                <span className="rounded-full border border-ink/10 bg-white/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-haze/75">
+                  {copy.header.hopsUsed(state.path.length)}
+                </span>
+              </div>
             </div>
 
             <div className="flex items-stretch gap-3">
               <div className="flex-1 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-center">
-                <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-gold/55">
+                <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.22em] text-gold/55">
                   {copy.header.start}
                 </p>
                 <p className="font-display text-xl leading-tight tracking-wide text-gold">
@@ -366,12 +413,15 @@ export default function App() {
 
               <div className="flex shrink-0 flex-col items-center justify-center gap-1">
                 <div className="h-px w-4 bg-gold/20" />
-                <div className="h-1.5 w-1.5 rounded-full border border-haze/25 bg-paper" />
+                <div className="rounded-full border border-ink/8 bg-paper px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-haze/55">
+                  vs
+                </div>
                 <div className="h-px w-4 bg-ember/20" />
               </div>
 
-              <div className="flex-1 rounded-2xl border border-ember/40 bg-ember/8 px-4 py-3.5 text-center">
-                <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-ember/55">
+              <div className="relative flex-1 rounded-2xl border border-ember/40 bg-[linear-gradient(180deg,rgba(15,106,72,0.12),rgba(255,255,255,0.85))] px-4 py-3.5 text-center shadow-[0_12px_26px_rgba(15,106,72,0.08)]">
+                <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(15,106,72,0.5),transparent)]" />
+                <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.22em] text-ember/60">
                   {copy.header.target}
                 </p>
                 <p className="font-display text-xl leading-tight tracking-wide text-ember">
@@ -379,6 +429,8 @@ export default function App() {
                 </p>
               </div>
             </div>
+
+            <p className="mt-4 text-sm leading-6 text-ink/76">{copy.header.routePromise}</p>
           </div>
         </div>
 
@@ -399,40 +451,38 @@ export default function App() {
         )}
 
         {isSolved ? (
-          <>
-            <PathStack
-              startId={challenge.startId}
-              destId={challenge.destinationId}
+          <div className="shrink-0 px-5 pb-2">
+            <ResultScreen
+              challenge={challenge}
               path={state.path}
               artists={artists}
+              graph={graph}
+              copy={copy}
+              onPractice={() => {
+                setPracticeMode((current) => !current)
+                setPanelView(null)
+              }}
+              solvedFromHistory={Boolean(savedDailyEntry && !practiceMode)}
             />
-            <div className="shrink-0 px-5 pb-2">
-              <ResultScreen
-                challenge={challenge}
-                path={state.path}
-                artists={artists}
-                graph={graph}
-                copy={copy}
-                onPractice={() => {
-                  setPracticeMode((current) => !current)
-                  setPanelView(null)
-                }}
-                solvedFromHistory={Boolean(savedDailyEntry && !practiceMode)}
-              />
-            </div>
-          </>
+          </div>
         ) : (
           <>
+            <div className="shrink-0 px-5 pb-4">
+              <HopBadge count={state.path.length} copy={copy} />
+            </div>
+
+            <div className="shrink-0 px-5 pb-4">
+              <MoveRevealCard artists={artists} copy={copy} step={latestMove} />
+            </div>
+
             {state.path.length > 0 && (
-              <>
-                <PathStack
-                  startId={challenge.startId}
-                  destId={challenge.destinationId}
-                  path={state.path}
-                  artists={artists}
-                />
-                <HopBadge count={state.path.length} />
-              </>
+              <PathStack
+                startId={challenge.startId}
+                destId={challenge.destinationId}
+                path={state.path}
+                artists={artists}
+                copy={copy}
+              />
             )}
 
             <ArtistGrid
@@ -472,5 +522,5 @@ function getStoredLocale(): Locale {
   if (typeof window === 'undefined') return 'en'
 
   const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY)
-  return saved === 'zu' ? 'zu' : 'en'
+  return saved === 'zu' || saved === 'xh' ? saved : 'en'
 }

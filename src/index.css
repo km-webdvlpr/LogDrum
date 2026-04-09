@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sora:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,13 +6,13 @@
 
 :root {
   color-scheme: light;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   background-color: #f8f2e3;
   background:
-    radial-gradient(circle at 14% 8%, rgba(183, 142, 30, 0.22), transparent 28%),
-    radial-gradient(circle at 84% 12%, rgba(15, 106, 72, 0.16), transparent 26%),
-    radial-gradient(circle at 50% 100%, rgba(22, 36, 28, 0.06), transparent 38%),
-    linear-gradient(180deg, rgba(255, 250, 241, 0.88) 0%, rgba(248, 242, 227, 0.98) 42%, #f3ecd9 100%),
+    radial-gradient(circle at 14% 8%, rgba(183, 142, 30, 0.24), transparent 28%),
+    radial-gradient(circle at 84% 12%, rgba(15, 106, 72, 0.18), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(22, 36, 28, 0.07), transparent 38%),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.9) 0%, rgba(248, 242, 227, 0.98) 42%, #f2ead7 100%),
     #f8f2e3;
 }
 
@@ -27,12 +27,12 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   background:
-    radial-gradient(circle at 14% 8%, rgba(183, 142, 30, 0.22), transparent 28%),
-    radial-gradient(circle at 84% 12%, rgba(15, 106, 72, 0.16), transparent 26%),
-    radial-gradient(circle at 50% 100%, rgba(22, 36, 28, 0.06), transparent 38%),
-    linear-gradient(180deg, rgba(255, 250, 241, 0.88) 0%, rgba(248, 242, 227, 0.98) 42%, #f3ecd9 100%),
+    radial-gradient(circle at 14% 8%, rgba(183, 142, 30, 0.24), transparent 28%),
+    radial-gradient(circle at 84% 12%, rgba(15, 106, 72, 0.18), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(22, 36, 28, 0.07), transparent 38%),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.9) 0%, rgba(248, 242, 227, 0.98) 42%, #f2ead7 100%),
     #f8f2e3;
   -webkit-tap-highlight-color: transparent;
   color: #16241c;
@@ -84,11 +84,12 @@ button {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.08;
   background-image:
     linear-gradient(rgba(22, 36, 28, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 36, 28, 0.018) 1px, transparent 1px);
-  background-size: 112px 112px;
+    linear-gradient(90deg, rgba(22, 36, 28, 0.016) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
+  background-size: 112px 112px, 112px 112px, 100% 3px;
   mix-blend-mode: soft-light;
   z-index: 0;
 }
@@ -98,8 +99,8 @@ button {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 12% 20%, rgba(183, 142, 30, 0.15), transparent 22%),
-    radial-gradient(circle at 88% 68%, rgba(15, 106, 72, 0.12), transparent 24%),
+    radial-gradient(circle at 12% 20%, rgba(183, 142, 30, 0.18), transparent 22%),
+    radial-gradient(circle at 88% 68%, rgba(15, 106, 72, 0.14), transparent 24%),
     linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.08) 100%);
   opacity: 0.95;
   z-index: 0;

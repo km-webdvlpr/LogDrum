@@ -4,6 +4,7 @@ import { findShortestPath, getSongsBetween } from '../engine/graph'
 import type { Graph } from '../types/wela'
 import { ToastBanner } from './ToastBanner'
 import type { AppCopy } from '../content/copy'
+import { getMoveNarrative } from '../content/connectionCopy'
 
 interface ResultScreenProps {
   challenge: Challenge
@@ -81,7 +82,16 @@ export function ResultScreen({
         )}
       </div>
 
+      <div className="mb-4 flex justify-center">
+        <span className="rounded-full border border-ember/20 bg-ember/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-ember">
+          {copy.result.routeComplete}
+        </span>
+      </div>
+
       <div className="mb-6 rounded-[30px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.74),rgba(248,242,227,0.7))] px-4 py-5 text-center shadow-glow backdrop-blur-sm">
+        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.24em] text-ember/75">
+          WELA
+        </p>
         <p className="font-display text-5xl tracking-widest text-gold mb-1">
           {hops}
           <span className="text-2xl text-gold/50 ml-1">
@@ -94,21 +104,22 @@ export function ResultScreen({
       </div>
 
       <div className="mb-5">
-        <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-2">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">
           {copy.result.yourPath}
         </p>
-        <PathDisplay path={path} artists={artists} challenge={challenge} />
+        <PathDisplay path={path} artists={artists} challenge={challenge} copy={copy} />
       </div>
 
       {!isOptimal && optimalArtistPath.length > 0 && (
         <div className="mb-6">
-          <p className="text-[10px] text-haze/70 uppercase tracking-widest mb-2">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">
             {copy.result.optimalPath}
           </p>
           <OptimalDisplay
             artistIds={optimalArtistPath}
             artists={artists}
             graph={graph}
+            copy={copy}
           />
         </div>
       )}
@@ -153,10 +164,12 @@ function PathDisplay({
   path,
   artists,
   challenge,
+  copy,
 }: {
   path: PathStep[]
   artists: Artist[]
   challenge: Challenge
+  copy: AppCopy
 }) {
   const steps = [challenge.startId, ...path.map((s) => s.toId)]
 
@@ -165,7 +178,8 @@ function PathDisplay({
       {steps.map((id, i) => {
         const isLast = i === steps.length - 1
         const name = artistName(artists, id)
-        const songTitle = i < path.length ? path[i].song.title : null
+        const move = i < path.length ? path[i] : null
+        const narrative = move ? getMoveNarrative(move, artists, copy) : null
         return (
           <div key={i}>
             <div
@@ -173,10 +187,15 @@ function PathDisplay({
             >
               {name}
             </div>
-            {songTitle && (
-              <div className="flex items-center gap-1.5 ml-3 mt-0.5">
-                <span className="text-gold/30 text-xs">v</span>
-                <span className="text-[10px] text-haze/80 italic">{songTitle}</span>
+            {narrative && (
+              <div className="ml-3 mt-1 rounded-2xl border border-ink/8 bg-white/60 px-3 py-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold/65">
+                    {copy.moveReveal.evidenceLabel}
+                  </span>
+                  <span className="text-[11px] font-medium text-gold">{narrative.evidence}</span>
+                </div>
+                <p className="mt-1 text-[11px] leading-5 text-ink/72">{narrative.explanation}</p>
               </div>
             )}
           </div>
@@ -190,10 +209,12 @@ function OptimalDisplay({
   artistIds,
   artists,
   graph,
+  copy,
 }: {
   artistIds: string[]
   artists: Artist[]
   graph: Graph
+  copy: AppCopy
 }) {
   return (
     <div className="space-y-2 rounded-[24px] border border-ink/10 bg-paper/80 p-4 opacity-75">
@@ -202,6 +223,18 @@ function OptimalDisplay({
         const name = artistName(artists, id)
         const nextId = artistIds[i + 1]
         const song = nextId ? getSongsBetween(graph, id, nextId)[0] ?? null : null
+        const narrative =
+          song && nextId
+            ? getMoveNarrative(
+                {
+                  fromId: id,
+                  toId: nextId,
+                  song,
+                },
+                artists,
+                copy
+              )
+            : null
         return (
           <div key={i}>
             <div
@@ -209,10 +242,15 @@ function OptimalDisplay({
             >
               {name}
             </div>
-            {song && (
-              <div className="flex items-center gap-1.5 ml-3 mt-0.5">
-                <span className="text-gold/20 text-xs">v</span>
-                <span className="text-[10px] text-haze/70 italic">{song.title}</span>
+            {narrative && (
+              <div className="ml-3 mt-1 rounded-2xl border border-ink/8 bg-white/55 px-3 py-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold/55">
+                    {copy.moveReveal.evidenceLabel}
+                  </span>
+                  <span className="text-[11px] font-medium text-gold/80">{narrative.evidence}</span>
+                </div>
+                <p className="mt-1 text-[11px] leading-5 text-ink/68">{narrative.explanation}</p>
               </div>
             )}
           </div>

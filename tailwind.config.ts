@@ -13,16 +13,18 @@ export default {
         paper: '#F8F2E3',
       },
       fontFamily: {
-        display: ['"Bebas Neue"', 'sans-serif'],
-        body: ['"Sora"', 'sans-serif'],
+        display: ['"Space Grotesk"', 'sans-serif'],
+        body: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['"Space Mono"', 'monospace'],
       },
       boxShadow: {
-        glow: '0 12px 32px rgba(22, 36, 28, 0.08), 0 2px 10px rgba(183, 142, 30, 0.08)',
+        glow: '0 14px 34px rgba(22, 36, 28, 0.09), 0 2px 12px rgba(183, 142, 30, 0.09)',
       },
       animation: {
         'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
         rise: 'rise 0.35s ease-out forwards',
         pop: 'pop 0.25s ease-out forwards',
+        drift: 'drift 12s ease-in-out infinite',
       },
       keyframes: {
         pulseGlow: {
@@ -40,6 +42,10 @@ export default {
           '0%': { transform: 'scale(0.95)', opacity: '0.7' },
           '60%': { transform: 'scale(1.04)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        drift: {
+          '0%, 100%': { transform: 'translate3d(0, 0, 0)' },
+          '50%': { transform: 'translate3d(0, 8px, 0)' },
         },
       },
     },

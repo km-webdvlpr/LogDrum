@@ -11,6 +11,13 @@ This repository is still named `LogDrum`, but the product inside it is `WELA`.
 - There is no backend, auth, account system, or streak economy
 - Daily challenges are generated using the South Africa date (`Africa/Johannesburg`)
 
+## Working Docs
+
+- [V1 Product Spec](docs/WELA_V1_PRODUCT_SPEC.md)
+- [Current Build Review](docs/CURRENT_BUILD_REVIEW.md)
+- [V1 Implementation Brief](docs/WELA_V1_IMPLEMENTATION_BRIEF.md)
+- [V1 Screen Blueprint](docs/WELA_V1_SCREEN_BLUEPRINT.md)
+
 ## Gameplay
 
 - Start from one artist and reach the target artist
