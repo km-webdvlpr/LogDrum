@@ -12,6 +12,16 @@ export function HowToPlayPanel({ copy }: HowToPlayPanelProps) {
       tone: 'gold',
     },
     {
+      title: copy.guide.logicTitle,
+      body: copy.guide.logicBody,
+      tone: 'green',
+    },
+    {
+      title: copy.guide.pathTitle,
+      body: copy.guide.pathBody,
+      tone: 'gold',
+    },
+    {
       title: copy.guide.moveTitle,
       body: copy.guide.moveBody,
       tone: 'green',
@@ -76,6 +86,13 @@ export function HowToPlayPanel({ copy }: HowToPlayPanelProps) {
             <p className="mt-2 text-sm leading-6 text-[#F0EAD0]">{card.body}</p>
           </article>
         ))}
+      </div>
+
+      <div className="mt-4 rounded-[4px] border border-[#1C3018] bg-[#0A0E09] px-3 py-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#F5C842]">
+          {copy.guide.futureTitle}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-[#A89E80]">{copy.guide.futureBody}</p>
       </div>
     </section>
   )

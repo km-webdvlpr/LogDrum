@@ -44,6 +44,10 @@ export interface AppCopy {
     subtitle: string
     goalTitle: string
     goalBody: string
+    logicTitle: string
+    logicBody: string
+    pathTitle: string
+    pathBody: string
     moveTitle: string
     moveBody: string
     costTitle: string
@@ -52,6 +56,8 @@ export interface AppCopy {
     scoreBody: string
     winTitle: string
     winBody: string
+    futureTitle: string
+    futureBody: string
   }
   grid: {
     currentArtist: string
@@ -245,6 +251,12 @@ const english: AppCopy = {
     subtitle: 'Simple guide',
     goalTitle: 'Goal',
     goalBody: 'Get from the start artist to the target artist.',
+    logicTitle: 'How artists connect',
+    logicBody:
+      'Right now, WELA connects artists through real shared songs. If both artists are credited on the same song, the move can count.',
+    pathTitle: 'More than one path',
+    pathBody:
+      'There can be more than one correct path. You do not need the only path. You just need a real one.',
     moveTitle: 'Make a move',
     moveBody: 'Type one artist at a time. If the link is real, WELA moves you forward.',
     costTitle: 'What can go wrong',
@@ -253,6 +265,9 @@ const english: AppCopy = {
     scoreBody: 'Finish fast, keep your lives, and avoid paid clues if you can.',
     winTitle: 'How to win',
     winBody: 'Reach the target before the timer ends or before you lose all 3 lives.',
+    futureTitle: 'Later',
+    futureBody:
+      'As WELA grows, it can also connect artists through features, producers, labels, live shows, samples, and music history links.',
   },
   grid: {
     currentArtist: 'Current artist',
@@ -440,6 +455,12 @@ const zulu: AppCopy = {
     subtitle: 'Umhlahlandlela olula',
     goalTitle: 'Inhloso',
     goalBody: 'Suka kumculi oqalayo uye kumculi wokugcina.',
+    logicTitle: 'Abaculi baxhuma kanjani',
+    logicBody:
+      'Okwamanje, iWELA ixhumanisa abaculi ngezingoma zangempela ababelana ngazo. Uma bobabili bebalwe engomeni eyodwa, ukuhamba kungabala.',
+    pathTitle: 'Kungaba nemizila eminingi',
+    pathBody:
+      'Kungaba nemizila engaphezu koyodwa elungile. Awudingi okuwukuphela komzila. Udinga nje umzila wangempela.',
     moveTitle: 'Yenza ukuhamba',
     moveBody: 'Bhala umculi oyedwa ngesikhathi. Uma uxhumano luyiqiniso, iWELA ikuyisa phambili.',
     costTitle: 'Okungahamba kabi',
@@ -448,6 +469,9 @@ const zulu: AppCopy = {
     scoreBody: 'Qeda ngokushesha, gcina izimpilo zakho, futhi ugweme amacebo akhokhelwayo uma ukwazi.',
     winTitle: 'Uwina kanjani',
     winBody: 'Finyelela kumculi wokugcina ngaphambi kokuphela kwesikhathi noma ngaphambi kokulahlekelwa yizo zonke izimpilo ezintathu.',
+    futureTitle: 'Ngokuzayo',
+    futureBody:
+      'Njengoba iWELA ikhula, ingaxhumanisa nabafake isandla, abakhiqizi, amalebula, imicimbi ebukhoma, ama-sample, nezixhumanisi zomlando womculo.',
   },
   grid: {
     currentArtist: 'Umculi okhona',
@@ -635,6 +659,12 @@ const xhosa: AppCopy = {
     subtitle: 'Isikhokelo esilula',
     goalTitle: 'Injongo',
     goalBody: 'Hamba ukusuka kwigcisa lokuqala uye kwelijoliswe kulo.',
+    logicTitle: 'Amagcisa adibana njani',
+    logicBody:
+      'Okwangoku, iWELA idibanisa amagcisa ngeengoma zokwenene ababelana ngazo. Ukuba bobabini badweliswe kwingoma enye, inyathelo lingabala.',
+    pathTitle: 'Kungakho iindlela ezininzi',
+    pathBody:
+      'Kungakho kubekho indlela engaphezu kwenye echanekileyo. Awudingi kuphela indlela enye. Udinga nje indlela yokwenene.',
     moveTitle: 'Yenza inyathelo',
     moveBody: 'Chwetheza igcisa elinye ngexesha. Ukuba ikhonkco liyinyani, iWELA iyakusa phambili.',
     costTitle: 'Yintoni enokungalungi',
@@ -643,6 +673,9 @@ const xhosa: AppCopy = {
     scoreBody: 'Gqiba ngokukhawuleza, gcina ubomi bakho, kwaye uphephe iingcebiso ezihlawulelwayo xa unako.',
     winTitle: 'Uwina njani',
     winBody: 'Fikelela kwigcisa ekujoliswe kulo phambi kokuphela kwexesha okanye phambi kokuba ulahlekelwe bubomi bonke obu-3.',
+    futureTitle: 'Kamva',
+    futureBody:
+      'Njengoko iWELA ikhula, inokudibanisa ngeefeature, abavelisi, iilebhile, imiboniso ephilayo, ii-sample, kunye nekhonkco lembali yomculo.',
   },
   grid: {
     currentArtist: 'Igcisa langoku',
