@@ -1,112 +1,90 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Black+Han+Sans&family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  font-family: 'Space Grotesk', sans-serif;
-  background-color: #f8f2e3;
-  background:
-    radial-gradient(circle at 14% 8%, rgba(183, 142, 30, 0.24), transparent 28%),
-    radial-gradient(circle at 84% 12%, rgba(15, 106, 72, 0.18), transparent 26%),
-    radial-gradient(circle at 50% 100%, rgba(22, 36, 28, 0.07), transparent 38%),
-    linear-gradient(180deg, rgba(255, 250, 241, 0.9) 0%, rgba(248, 242, 227, 0.98) 42%, #f2ead7 100%),
-    #f8f2e3;
+  color-scheme: dark;
+  font-family: 'DM Sans', sans-serif;
+  background: #0a0e09;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 html {
   scroll-behavior: smooth;
-  background: #f8f2e3;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(46, 255, 122, 0.06), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(245, 200, 66, 0.09), transparent 22%),
+    linear-gradient(180deg, rgba(10, 14, 9, 0.98), rgba(10, 14, 9, 1)),
+    #0a0e09;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   background:
-    radial-gradient(circle at 14% 8%, rgba(183, 142, 30, 0.24), transparent 28%),
-    radial-gradient(circle at 84% 12%, rgba(15, 106, 72, 0.18), transparent 26%),
-    radial-gradient(circle at 50% 100%, rgba(22, 36, 28, 0.07), transparent 38%),
-    linear-gradient(180deg, rgba(255, 250, 241, 0.9) 0%, rgba(248, 242, 227, 0.98) 42%, #f2ead7 100%),
-    #f8f2e3;
+    radial-gradient(circle at 20% 10%, rgba(46, 255, 122, 0.06), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(245, 200, 66, 0.09), transparent 22%),
+    linear-gradient(180deg, rgba(10, 14, 9, 0.98), rgba(10, 14, 9, 1)),
+    #0a0e09;
+  color: #f0ead0;
   -webkit-tap-highlight-color: transparent;
-  color: #16241c;
   overflow-x: hidden;
 }
 
-body::before,
-body::after {
+body::before {
   content: '';
   position: fixed;
-  inset: auto;
+  inset: 0;
   pointer-events: none;
-  z-index: 0;
-  filter: blur(0);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.08;
+  mix-blend-mode: screen;
 }
 
-body::before {
-  top: -80px;
-  left: -48px;
-  width: 220px;
-  height: 220px;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle, rgba(183, 142, 30, 0.16) 0%, rgba(183, 142, 30, 0.04) 44%, transparent 74%);
+button,
+input,
+textarea {
+  font: inherit;
 }
-
-body::after {
-  right: -84px;
-  bottom: 12%;
-  width: 260px;
-  height: 260px;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle, rgba(15, 106, 72, 0.13) 0%, rgba(15, 106, 72, 0.03) 50%, transparent 76%);
-}
-
-button, input, textarea { font: inherit; }
 
 button {
-  -webkit-appearance: none;
   appearance: none;
+  -webkit-appearance: none;
 }
 
 #root {
   min-height: 100vh;
 }
 
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image:
-    linear-gradient(rgba(22, 36, 28, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 36, 28, 0.016) 1px, transparent 1px),
-    linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
-  background-size: 112px 112px, 112px 112px, 100% 3px;
-  mix-blend-mode: soft-light;
-  z-index: 0;
+.ticker-run {
+  display: inline-block;
+  min-width: 200%;
+  animation: tickerRun 18s linear infinite;
 }
 
-.stage-glow {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 12% 20%, rgba(183, 142, 30, 0.18), transparent 22%),
-    radial-gradient(circle at 88% 68%, rgba(15, 106, 72, 0.14), transparent 24%),
-    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.08) 100%);
-  opacity: 0.95;
-  z-index: 0;
+.font-title {
+  font-family: 'Black Han Sans', sans-serif;
 }
 
-header, main, div[class*='px-'] {
-  position: relative;
-  z-index: 1;
+.font-score {
+  font-family: 'Orbitron', monospace;
+}
+
+@keyframes tickerRun {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }

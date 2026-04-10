@@ -1,4 +1,4 @@
-import type { Artist, PathStep } from '../types/wela'
+import type { Artist, PathStep, SessionFeedback } from '../types/wela'
 import type { AppCopy } from '../content/copy'
 import { getMoveNarrative } from '../content/connectionCopy'
 
@@ -6,58 +6,79 @@ interface MoveRevealCardProps {
   artists: Artist[]
   copy: AppCopy
   step: PathStep | null
+  feedback: SessionFeedback | null
 }
 
-export function MoveRevealCard({ artists, copy, step }: MoveRevealCardProps) {
-  if (!step) {
-    return (
-      <section className="rounded-[28px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(244,237,221,0.92))] px-4 py-4 shadow-glow backdrop-blur-sm">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-haze/70">
-            {copy.moveReveal.emptyTitle}
-          </p>
-          <span className="rounded-full border border-ink/10 bg-white/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-haze/65">
-            {copy.moveReveal.idleBadge}
-          </span>
-        </div>
-        <p className="text-sm leading-6 text-ink/78">{copy.moveReveal.emptyBody}</p>
-      </section>
-    )
-  }
+export function MoveRevealCard({ artists, copy, step, feedback }: MoveRevealCardProps) {
+  const tone = feedback?.tone ?? 'idle'
+  const palette =
+    tone === 'success'
+      ? {
+          border: 'border-[#00B050]',
+          tag: 'text-[#2EFF7A]',
+          badge: 'border-[#00B050] bg-[#004D24] text-[#2EFF7A]',
+        }
+      : tone === 'error'
+        ? {
+            border: 'border-[#E03030]',
+            tag: 'text-[#FF8080]',
+            badge: 'border-[#E03030] bg-[#2A0E0E] text-[#FF8080]',
+          }
+        : {
+            border: 'border-[#8A6510]',
+            tag: 'text-[#F5C842]',
+            badge: 'border-[#8A6510] bg-[#1A1408] text-[#F5C842]',
+          }
 
-  const narrative = getMoveNarrative(step, artists, copy)
+  const narrative =
+    step && tone !== 'error' ? getMoveNarrative(step, artists, copy) : null
 
   return (
-    <section className="animate-rise rounded-[28px] border border-gold/20 bg-[linear-gradient(140deg,rgba(183,142,30,0.16),rgba(255,255,255,0.92)_36%,rgba(15,106,72,0.09)_100%)] px-4 py-4 shadow-glow backdrop-blur-sm">
+    <section className={`rounded-[4px] border bg-[#0F1A0D] px-4 py-4 ${palette.border}`}>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-gold/85">
-          {copy.moveReveal.title}
+        <p className={`font-mono text-[10px] uppercase tracking-[0.24em] ${palette.tag}`}>
+          {narrative ? copy.moveReveal.title : copy.moveReveal.emptyTitle}
         </p>
-        <span className="rounded-full border border-gold/20 bg-white/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ember">
-          {copy.moveReveal.liveBadge}
+        <span className={`rounded-[3px] border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${palette.badge}`}>
+          {tone === 'success'
+            ? copy.moveReveal.liveBadge
+            : tone === 'error'
+              ? copy.cabinet.failed
+              : copy.moveReveal.idleBadge}
         </span>
       </div>
 
-      <div className="mb-3 flex items-center gap-2 text-base font-semibold leading-tight text-ink">
-        <span className="truncate">{narrative.fromName}</span>
-        <span className="font-mono text-sm text-gold/80">{'->'}</span>
-        <span className="truncate text-ember">{narrative.toName}</span>
-      </div>
+      {narrative ? (
+        <>
+          <div className="mb-3 flex items-center gap-2 text-base font-semibold leading-tight text-[#F0EAD0]">
+            <span className="truncate">{narrative.fromName}</span>
+            <span className="font-mono text-sm text-[#8A6510]">{'->'}</span>
+            <span className="truncate text-[#2EFF7A]">{narrative.toName}</span>
+          </div>
 
-      <div className="space-y-2 rounded-[22px] border border-white/60 bg-white/65 px-3.5 py-3">
-        <div>
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-haze/65">
-            {copy.moveReveal.evidenceLabel}
+          <div className="space-y-2 rounded-[4px] border border-[#1C3018] bg-[#0A0E09] px-3.5 py-3">
+            <div>
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#A89E80]">
+                {copy.moveReveal.evidenceLabel}
+              </p>
+              <p className="text-sm font-medium text-[#F5C842]">{narrative.evidence}</p>
+            </div>
+            <div>
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#A89E80]">
+                {copy.moveReveal.explanationLabel}
+              </p>
+              <p className="text-sm leading-6 text-[#F0EAD0]">{narrative.explanation}</p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="rounded-[4px] border border-[#1C3018] bg-[#0A0E09] px-3.5 py-3">
+          <p className="font-title text-base text-[#F0EAD0]">{feedback?.title ?? copy.moveReveal.emptyTitle}</p>
+          <p className="mt-2 text-sm leading-6 text-[#A89E80]">
+            {feedback?.body ?? copy.moveReveal.emptyBody}
           </p>
-          <p className="text-sm font-medium text-gold">{narrative.evidence}</p>
         </div>
-        <div>
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-haze/65">
-            {copy.moveReveal.explanationLabel}
-          </p>
-          <p className="text-sm leading-6 text-ink/80">{narrative.explanation}</p>
-        </div>
-      </div>
+      )}
     </section>
   )
 }

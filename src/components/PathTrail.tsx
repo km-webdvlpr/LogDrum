@@ -12,20 +12,18 @@ function artistName(artists: Artist[], id: string): string {
 }
 
 export function PathTrail({ startId, path, artists, currentId }: PathTrailProps) {
-  if (path.length === 0) return null
-
   return (
-    <div className="px-4 pb-3 overflow-x-auto">
-      <div className="flex items-start gap-0 min-w-max">
+    <div className="overflow-x-auto rounded-[4px] border border-[#1C3018] bg-[#0A0E09] px-4 py-4">
+      <div className="flex min-w-max items-start gap-0">
         {/* Start node */}
         <TrailNode label={artistName(artists, startId)} isStart />
 
-        {path.map((step, i) => (
-          <div key={i} className="flex items-start">
+        {path.map((step, index) => (
+          <div key={`${step.toId}-${index}`} className="flex items-start">
             {/* Arrow + song label */}
             <div className="flex flex-col items-center justify-center px-1 pt-2">
-              <span className="text-gold/70 text-base leading-none">{'->'}</span>
-              <span className="text-[9px] text-haze/80 mt-0.5 max-w-[60px] text-center leading-tight truncate">
+              <span className="font-mono text-sm leading-none text-[#8A6510]">{'->'}</span>
+              <span className="mt-1 max-w-[86px] text-center font-mono text-[9px] uppercase leading-tight tracking-[0.12em] text-[#A89E80]">
                 {step.song.title}
               </span>
             </div>
@@ -33,6 +31,7 @@ export function PathTrail({ startId, path, artists, currentId }: PathTrailProps)
             <TrailNode
               label={artistName(artists, step.toId)}
               isActive={step.toId === currentId}
+              isLocked={index < path.length - 1}
             />
           </div>
         ))}
@@ -45,21 +44,24 @@ function TrailNode({
   label,
   isStart,
   isActive,
+  isLocked,
 }: {
   label: string
   isStart?: boolean
   isActive?: boolean
+  isLocked?: boolean
 }) {
   return (
     <div
       className={`
-        flex flex-col items-center justify-center rounded-xl border px-2 py-1.5 min-w-[60px] max-w-[80px]
-        ${isStart ? 'border-gold/30 bg-gold/10 text-gold/80' : ''}
-        ${isActive ? 'border-gold bg-gold/15 text-gold shadow-[0_0_8px_rgba(183,142,30,0.22)]' : ''}
-        ${!isStart && !isActive ? 'border-ink/10 bg-white/75 text-ink/65' : ''}
+        flex min-w-[92px] max-w-[120px] flex-col items-center justify-center rounded-[3px] border px-3 py-2
+        ${isStart ? 'border-[#8A6510] bg-[#1A1408] text-[#F5C842]' : ''}
+        ${isActive ? 'border-[#00B050] bg-[#004D24] text-[#2EFF7A] shadow-[0_0_18px_rgba(46,255,122,0.14)]' : ''}
+        ${isLocked ? 'border-[#1C3018] bg-[#0F1A0D] text-[#F0EAD0]' : ''}
+        ${!isStart && !isActive && !isLocked ? 'border-[#1C3018] bg-[#0F1A0D] text-[#A89E80]' : ''}
       `}
     >
-      <span className="text-[10px] font-medium leading-tight text-center">{label}</span>
+      <span className="text-center font-title text-xs leading-tight">{label}</span>
     </div>
   )
 }

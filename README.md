@@ -17,6 +17,7 @@ This repository is still named `LogDrum`, but the product inside it is `WELA`.
 - [Current Build Review](docs/CURRENT_BUILD_REVIEW.md)
 - [V1 Implementation Brief](docs/WELA_V1_IMPLEMENTATION_BRIEF.md)
 - [V1 Screen Blueprint](docs/WELA_V1_SCREEN_BLUEPRINT.md)
+- [Arcade Art Direction](docs/WELA_ARCADE_ART_DIRECTION.md)
 
 ## Gameplay
 

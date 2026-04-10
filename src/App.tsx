@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import artistsData from './data/artists.json'
 import songsData from './data/songs.json'
-import { ArtistGrid } from './components/ArtistGrid'
+import { ArtistInputPanel } from './components/ArtistInputPanel'
+import { CluePanel } from './components/CluePanel'
 import { MoveRevealCard } from './components/MoveRevealCard'
-import { PlayerLedger } from './components/PlayerLedger'
+import { PathTrail } from './components/PathTrail'
 import { ResultScreen } from './components/ResultScreen'
-import { ToastBanner } from './components/ToastBanner'
+import { StatusRail } from './components/StatusRail'
+import { TickerStrip } from './components/TickerStrip'
 import { getCopy, type Locale } from './content/copy'
 import { getDailyChallenge, getSADateKey } from './engine/challenge'
 import { buildGraph } from './engine/graph'
-import { getTodayEntry, loadHistory } from './store/history'
+import { calculateFinalScore } from './engine/scoring'
+import { loadHistory } from './store/history'
 import { useGame } from './store/useGame'
-import type { Artist, Challenge, PathStep, Song } from './types/wela'
+import type { Artist, Challenge, HistoryEntry, Song } from './types/wela'
 
 const artists = artistsData as Artist[]
 const songs = songsData as Song[]
-
-type PanelView = 'ledger' | null
 const LOCALE_STORAGE_KEY = 'wela-locale'
 
 function useSADate() {
@@ -34,194 +35,11 @@ function useSADate() {
   return dateKey
 }
 
-function artistName(list: Artist[], id: string) {
-  return list.find((artist) => artist.id === id)?.name ?? id
-}
-
-function HowToPlayModal({
-  copy,
-  onClose,
-}: {
-  copy: ReturnType<typeof getCopy>
-  onClose: () => void
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-0 pt-10"
-      style={{ background: 'rgba(22, 36, 28, 0.55)' }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-[480px] rounded-t-[32px] border border-ink/10 bg-paper px-6 pb-10 pt-6 shadow-glow animate-rise"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <p className="font-display text-3xl tracking-[0.18em] text-gold">{copy.rules.title}</p>
-              <span className="rounded-full border border-gold/25 bg-gold/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-gold/75">
-                {copy.rules.badge}
-              </span>
-            </div>
-            <p className="text-sm leading-6 text-ink/78">{copy.rules.subtitle}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 bg-white/70 text-base text-haze/65 transition-colors hover:text-ink"
-            aria-label={copy.header.rules}
-          >
-            x
-          </button>
-        </div>
-
-        <div className="mb-5 rounded-[24px] border border-ink/10 bg-white/60 px-4 py-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-haze/70">
-            {copy.header.routeLabel}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-ink/80">{copy.header.routePromise}</p>
-        </div>
-
-        <div className="space-y-3">
-          {copy.rules.steps.map((step, index) => (
-            <div
-              key={step}
-              className="rounded-[24px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,242,227,0.9))] px-4 py-4"
-            >
-              <div className="flex gap-3">
-                <span className="mt-0.5 w-7 shrink-0 font-mono text-sm leading-none tracking-[0.18em] text-gold/65">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <p className="text-sm leading-6 text-ink/80">{step}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-5 rounded-[24px] border border-gold/15 bg-[linear-gradient(135deg,rgba(183,142,30,0.14),rgba(255,255,255,0.7),rgba(15,106,72,0.1))] px-4 py-4">
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/60">
-            {copy.rules.noteTitle}
-          </p>
-          <p className="text-sm leading-6 text-ink/78">{copy.rules.noteBody}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function PathStack({
-  startId,
-  destId,
-  path,
-  artists: artistList,
-  copy,
-}: {
-  startId: string
-  destId: string
-  path: PathStep[]
-  artists: Artist[]
-  copy: ReturnType<typeof getCopy>
-}) {
-  const steps = [startId, ...path.map((step) => step.toId)]
-  const previousLength = useRef(0)
-  const latestIndex = steps.length - 1
-
-  useEffect(() => {
-    previousLength.current = steps.length
-  })
-
-  return (
-    <div className="px-5 pb-3 pt-1">
-      {steps.map((id, index) => {
-        const isStart = index === 0
-        const isLast = index === latestIndex
-        const isDestination = id === destId
-        const song = index > 0 ? path[index - 1]?.song ?? null : null
-        const isNew = index === latestIndex && latestIndex > previousLength.current - 1 && latestIndex > 0
-
-        return (
-          <div key={`${id}-${index}`} className={isNew ? 'animate-rise' : ''}>
-            {song && (
-              <div className="flex items-center gap-2.5 py-1 pl-5">
-                <div
-                  className="shrink-0"
-                  style={{ width: 1, height: 16, background: 'rgba(183, 142, 30, 0.2)' }}
-                />
-                <span className="max-w-[220px] truncate text-[10px] italic leading-none text-haze/55">
-                  {song.title}
-                </span>
-              </div>
-            )}
-
-            <div
-              className={[
-                'flex items-center gap-3 rounded-2xl border px-4 py-3',
-                isDestination ? 'border-ember/40 bg-ember/8' : '',
-                isStart && !isDestination ? 'border-gold/30 bg-gold/8' : '',
-                !isStart && !isDestination ? 'border-ink/8 bg-white/55' : '',
-              ].join(' ')}
-            >
-              <div
-                className={[
-                  'h-2 w-2 shrink-0 rounded-full',
-                  isDestination ? 'bg-ember' : isStart ? 'bg-gold' : 'bg-gold/35',
-                ].join(' ')}
-              />
-              <span
-                className={[
-                  'flex-1 text-sm font-semibold leading-tight',
-                  isDestination ? 'text-ember' : isStart ? 'text-gold' : 'text-ink/85',
-                ].join(' ')}
-              >
-                {artistName(artistList, id)}
-              </span>
-              {isStart && !isLast && (
-                <span className="shrink-0 text-[9px] uppercase tracking-[0.16em] text-gold/45">
-                  {copy.header.start}
-                </span>
-              )}
-              {isDestination && isLast && (
-                <span className="shrink-0 text-[9px] uppercase tracking-[0.16em] text-ember/55">
-                  solved
-                </span>
-              )}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function HopBadge({ count, copy }: { count: number; copy: ReturnType<typeof getCopy> }) {
-  return (
-    <div className="rounded-[28px] border border-ink/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(244,237,221,0.9))] px-4 py-4 shadow-glow backdrop-blur-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">
-            {copy.grid.currentRoute}
-          </p>
-          <p className="text-base font-semibold text-gold">
-            {count === 0 ? copy.grid.routeReady : copy.grid.routeLocked(count)}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.22em] text-haze/70">
-            {copy.grid.hopsLabel}
-          </p>
-          <p className="font-mono text-lg font-semibold text-ink/80 tabular-nums">{count}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function App() {
   const graph = useMemo(() => buildGraph(artists, songs), [])
   const dateKey = useSADate()
-  const [practiceMode, setPracticeMode] = useState(false)
-  const [panelView, setPanelView] = useState<PanelView>(null)
-  const [showRules, setShowRules] = useState(false)
   const [locale, setLocale] = useState<Locale>(getStoredLocale)
+  const [showRules, setShowRules] = useState(false)
   const copy = useMemo(() => getCopy(locale), [locale])
 
   useEffect(() => {
@@ -229,24 +47,14 @@ export default function App() {
     document.documentElement.lang = locale
   }, [locale])
 
-  const challenge = useMemo<Challenge>(() => {
-    if (practiceMode) {
-      const seed = String(Math.floor(Date.now() / 120_000))
-      return { ...getDailyChallenge(graph, seed), date: 'practice' }
-    }
-
-    return getDailyChallenge(graph, dateKey)
-  }, [graph, dateKey, practiceMode])
-
+  const challenge = useMemo<Challenge>(() => getDailyChallenge(graph, artists, dateKey), [graph, dateKey])
   const historyEntries = useMemo(
     () => loadHistory(),
-    [stateKeyForHistory(challenge.date, practiceMode)]
+    [dateKey, challenge.id]
   )
 
   const savedDailyEntry = useMemo(() => {
-    if (practiceMode) return null
-
-    const entry = historyEntries.find((item) => item.date === dateKey) ?? getTodayEntry(dateKey)
+    const entry = historyEntries.find((item) => item.date === challenge.date)
     if (!entry) return null
 
     const isSameChallenge =
@@ -255,267 +63,303 @@ export default function App() {
       entry.date === challenge.date
 
     return isSameChallenge ? entry : null
-  }, [practiceMode, historyEntries, dateKey, challenge])
+  }, [historyEntries, challenge])
 
-  const { state, makeMove, undo } = useGame(graph, challenge, savedDailyEntry)
+  const { state, submitArtist, revealClue, reset } = useGame(graph, artists, challenge, savedDailyEntry)
 
   const startArtist = artists.find((artist) => artist.id === challenge.startId)!
   const destinationArtist = artists.find((artist) => artist.id === challenge.destinationId)!
-  const pathIds = new Set(state.path.map((step) => step.toId))
-  const latestMove = state.path[state.path.length - 1] ?? null
-  const isSolved = state.status === 'solved'
-  const isDaily = !practiceMode
-  const isSolvedDaily = isDaily && isSolved
+  const breakdown = calculateFinalScore({
+    challenge,
+    liveScore: state.score,
+    timerRemaining: state.timerRemaining,
+    stepsTaken: state.path.length,
+    paidClueIds: state.paidClueIds,
+    livesRemaining: state.livesRemaining,
+    solved: state.status === 'solved',
+  })
+  if (state.finalScore != null) {
+    breakdown.finalScore = state.finalScore
+  }
 
-  const visibleHistory = useMemo(() => {
-    if (state.status !== 'solved' || challenge.date === 'practice') return historyEntries
-
-    const alreadyStored = historyEntries.some((entry) => entry.date === challenge.date)
-    if (alreadyStored) return historyEntries
-
-    return [
-      {
-        date: challenge.date,
-        startId: challenge.startId,
-        destinationId: challenge.destinationId,
-        path: state.path,
-        hops: state.path.length,
-        optimal: challenge.optimalLength,
-        timestamp: Date.now(),
-      },
-      ...historyEntries,
-    ]
-  }, [state.status, state.path, challenge, historyEntries])
+  const streak = useMemo(() => getSolvedStreak(historyEntries), [historyEntries])
+  const difficultyLabel = resolveDifficultyLabel(copy, challenge.difficulty)
+  const statusLabel =
+    state.status === 'solved'
+      ? copy.cabinet.solved
+      : state.status === 'failed'
+        ? copy.cabinet.failed
+        : copy.cabinet.active
 
   return (
-    <div className="relative mx-auto flex min-h-screen max-w-[480px] flex-col overflow-hidden bg-paper text-ink">
-      <div className="noise-overlay" />
-      <div className="stage-glow" />
-
-      <main className="relative z-10 flex min-h-screen flex-col">
-        <header className="shrink-0 px-5 pb-2 pt-5">
-          <div className="flex items-start justify-between gap-4">
+    <div className="min-h-screen bg-[#0A0E09] text-[#F0EAD0]">
+      <div className="mx-auto max-w-6xl px-4 py-4 sm:px-5 lg:px-6">
+        <header className="rounded-[4px] border border-[#8A6510] bg-[#0F1A0D] px-4 py-4 shadow-[0_0_0_1px_rgba(245,200,66,0.06)]">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display text-4xl tracking-[0.2em] text-gold">WELA</span>
-                <span
-                  className={[
-                    'rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em]',
-                    practiceMode
-                      ? 'border-ember/25 bg-ember/8 text-ember/65'
-                      : 'border-gold/25 bg-gold/8 text-gold/65',
-                  ].join(' ')}
-                >
-                  {practiceMode ? copy.header.practice : copy.header.daily}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="font-score text-4xl tracking-[0.2em] text-[#F5C842] sm:text-5xl">WELA</span>
+                <span className="rounded-[3px] border border-[#1C3018] bg-[#0A0E09] px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#2EFF7A]">
+                  {copy.cabinet.footerDaily}
                 </span>
-                {isSolved && (
-                  <span className="text-[9px] uppercase tracking-[0.16em] text-ember/60">
-                    solved
-                  </span>
-                )}
+                <span className="rounded-[3px] border border-[#8A6510] bg-[#1A1408] px-2 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#F5C842]">
+                  {statusLabel}
+                </span>
               </div>
-              <p className="mt-2 max-w-[230px] text-sm leading-5 text-ink/72">{copy.header.tagline}</p>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#A89E80]">
+                {copy.header.routePromise}
+              </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="inline-flex items-center gap-0.5 rounded-full border border-ink/10 bg-white/70 p-0.5 shadow-glow">
-                <button
-                  onClick={() => setLocale('en')}
-                  className={[
-                    'rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.15em] transition-colors',
-                    locale === 'en'
-                      ? 'border border-gold/25 bg-gold/15 text-ink'
-                      : 'text-haze/60 hover:text-ink',
-                  ].join(' ')}
-                >
-                  EN
-                </button>
-                <button
-                  onClick={() => setLocale('zu')}
-                  className={[
-                    'rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.15em] transition-colors',
-                    locale === 'zu'
-                      ? 'border border-ember/20 bg-ember/12 text-ember'
-                      : 'text-haze/60 hover:text-ink',
-                  ].join(' ')}
-                >
-                  ZU
-                </button>
-                <button
-                  onClick={() => setLocale('xh')}
-                  className={[
-                    'rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.15em] transition-colors',
-                    locale === 'xh'
-                      ? 'border border-ember/20 bg-ember/12 text-ember'
-                      : 'text-haze/60 hover:text-ink',
-                  ].join(' ')}
-                >
-                  XH
-                </button>
-              </div>
-
+            <div className="flex flex-wrap items-center gap-2">
+              <LocaleButton label="EN" active={locale === 'en'} onClick={() => setLocale('en')} />
+              <LocaleButton label="ZU" active={locale === 'zu'} onClick={() => setLocale('zu')} />
+              <LocaleButton label="XH" active={locale === 'xh'} onClick={() => setLocale('xh')} />
               <button
-                onClick={() => setPanelView((current) => (current === 'ledger' ? null : 'ledger'))}
-                className={[
-                  'flex h-8 w-8 items-center justify-center rounded-full border text-xs transition-colors',
-                  panelView === 'ledger'
-                    ? 'border-ember/30 bg-ember/10 text-ember'
-                    : 'border-ink/10 bg-white/70 text-haze/65 hover:text-ink',
-                ].join(' ')}
-                aria-label={copy.header.history}
+                onClick={() => setShowRules((current) => !current)}
+                className="rounded-[3px] border border-[#1C3018] bg-[#0A0E09] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#A89E80] transition-colors hover:border-[#8A6510] hover:text-[#F5C842]"
               >
-                H
-              </button>
-
-              <button
-                onClick={() => setShowRules(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 bg-white/70 text-xs text-haze/65 transition-colors hover:text-ink"
-                aria-label={copy.header.rules}
-              >
-                ?
+                {copy.header.rules}
               </button>
             </div>
           </div>
         </header>
 
-        <div className="shrink-0 px-5 pb-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums text-haze/50">
-            {practiceMode ? copy.header.freshEveryTwoMinutes : dateKey}
-          </p>
+        <div className="mt-3">
+          <TickerStrip
+            date={challenge.date}
+            par={challenge.par}
+            timerSeconds={challenge.timerSeconds}
+            difficultyLabel={difficultyLabel}
+            copy={copy}
+          />
         </div>
 
-        <div className="shrink-0 px-5 pb-4">
-          <div className="relative overflow-hidden rounded-3xl border border-ink/8 bg-white/60 px-4 py-4 shadow-glow backdrop-blur-sm">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(183,142,30,0.55),transparent)]" />
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-haze/70">
-                  {copy.header.routeLabel}
-                </p>
-                <p className="mt-1 text-xs text-haze/72">{copy.header.connectionPrompt}</p>
-              </div>
-              <div className="text-right">
-                <span className="rounded-full border border-ink/10 bg-white/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-haze/75">
-                  {copy.header.hopsUsed(state.path.length)}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-stretch gap-3">
-              <div className="flex-1 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3.5 text-center">
-                <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.22em] text-gold/55">
-                  {copy.header.start}
-                </p>
-                <p className="font-display text-xl leading-tight tracking-wide text-gold">
-                  {startArtist.name}
-                </p>
-              </div>
-
-              <div className="flex shrink-0 flex-col items-center justify-center gap-1">
-                <div className="h-px w-4 bg-gold/20" />
-                <div className="rounded-full border border-ink/8 bg-paper px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-haze/55">
-                  vs
+        <main className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
+          <section className="space-y-4">
+            <section className="rounded-[4px] border border-[#8A6510] bg-[#0F1A0D] px-4 py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#F5C842]">
+                    {copy.cabinet.challengePanel}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#A89E80]">
+                    {copy.header.connectionPrompt}
+                  </p>
                 </div>
-                <div className="h-px w-4 bg-ember/20" />
+
+                <div className="rounded-[3px] border border-[#1C3018] bg-[#0A0E09] px-3 py-2 text-right">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#A89E80]">
+                    {copy.status.difficulty}
+                  </p>
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[#2EFF7A]">
+                    {difficultyLabel}
+                  </p>
+                </div>
               </div>
 
-              <div className="relative flex-1 rounded-2xl border border-ember/40 bg-[linear-gradient(180deg,rgba(15,106,72,0.12),rgba(255,255,255,0.85))] px-4 py-3.5 text-center shadow-[0_12px_26px_rgba(15,106,72,0.08)]">
-                <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(15,106,72,0.5),transparent)]" />
-                <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.22em] text-ember/60">
-                  {copy.header.target}
-                </p>
-                <p className="font-display text-xl leading-tight tracking-wide text-ember">
-                  {destinationArtist.name}
-                </p>
+              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_1fr]">
+                <CabinetNode label={copy.header.start} value={startArtist.name} tone="start" />
+                <div className="flex items-center justify-center">
+                  <span className="rounded-[3px] border border-[#1C3018] bg-[#0A0E09] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[#A89E80]">
+                    VS
+                  </span>
+                </div>
+                <CabinetNode label={copy.header.target} value={destinationArtist.name} tone="target" />
               </div>
-            </div>
+            </section>
 
-            <p className="mt-4 text-sm leading-6 text-ink/76">{copy.header.routePromise}</p>
-          </div>
-        </div>
-
-        <div className="shrink-0 px-5 pb-4">
-          {isSolvedDaily ? (
-            <ToastBanner tone="success" message={copy.toasts.solvedDaily} />
-          ) : isDaily ? (
-            <ToastBanner message={copy.toasts.dailyInfo} />
-          ) : (
-            <ToastBanner message={copy.toasts.practiceInfo} />
-          )}
-        </div>
-
-        {panelView === 'ledger' && (
-          <div className="shrink-0 animate-rise px-5 pb-4">
-            <PlayerLedger artists={artists} entries={visibleHistory} copy={copy} />
-          </div>
-        )}
-
-        {isSolved ? (
-          <div className="shrink-0 px-5 pb-2">
-            <ResultScreen
-              challenge={challenge}
-              path={state.path}
-              artists={artists}
-              graph={graph}
-              copy={copy}
-              onPractice={() => {
-                setPracticeMode((current) => !current)
-                setPanelView(null)
-              }}
-              solvedFromHistory={Boolean(savedDailyEntry && !practiceMode)}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="shrink-0 px-5 pb-4">
-              <HopBadge count={state.path.length} copy={copy} />
-            </div>
-
-            <div className="shrink-0 px-5 pb-4">
-              <MoveRevealCard artists={artists} copy={copy} step={latestMove} />
-            </div>
-
-            {state.path.length > 0 && (
-              <PathStack
+            <section className="rounded-[4px] border border-[#1C3018] bg-[#0F1A0D] px-4 py-4">
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.24em] text-[#F5C842]">
+                {copy.cabinet.routePanel}
+              </p>
+              <PathTrail
                 startId={challenge.startId}
-                destId={challenge.destinationId}
                 path={state.path}
                 artists={artists}
+                currentId={state.currentId}
+              />
+            </section>
+
+            {state.status === 'playing' ? (
+              <>
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+                  <ArtistInputPanel
+                    currentArtist={artistName(artists, state.currentId)}
+                    targetArtist={destinationArtist.name}
+                    disabled={state.status !== 'playing'}
+                    copy={copy}
+                    onSubmit={submitArtist}
+                  />
+                  <CluePanel
+                    clues={challenge.clues}
+                    revealedClueIds={state.revealedClueIds}
+                    onReveal={revealClue}
+                    copy={copy}
+                  />
+                </div>
+
+                <MoveRevealCard
+                  artists={artists}
+                  copy={copy}
+                  step={state.lastMove}
+                  feedback={state.feedback}
+                />
+              </>
+            ) : (
+              <ResultScreen
+                challenge={challenge}
+                path={state.path}
+                artists={artists}
+                breakdown={breakdown}
+                status={state.status}
+                resultReason={state.resultReason}
+                solvedFromHistory={Boolean(savedDailyEntry)}
                 copy={copy}
+                onReset={reset}
               />
             )}
 
-            <ArtistGrid
-              artists={artists}
-              graph={graph}
-              currentId={state.currentId}
-              destinationId={challenge.destinationId}
-              pathIds={pathIds}
-              copy={copy}
-              onMove={makeMove}
-            />
-
-            {state.path.length > 0 && (
-              <div className="shrink-0 px-5 pb-5 pt-1">
-                <button
-                  onClick={undo}
-                  className="text-xs text-haze/60 transition-colors hover:text-ember"
-                >
-                  {copy.header.undoLastHop}
-                </button>
-              </div>
+            {showRules && (
+              <section className="rounded-[4px] border border-[#1C3018] bg-[#0F1A0D] px-4 py-4">
+                <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.24em] text-[#F5C842]">
+                  {copy.cabinet.howPanel}
+                </p>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {copy.rules.steps.map((step, index) => (
+                    <div key={step} className="rounded-[4px] border border-[#1C3018] bg-[#0A0E09] px-3 py-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#2EFF7A]">
+                        {`0${index + 1}`}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-[#F0EAD0]">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
-          </>
-        )}
-      </main>
+          </section>
 
-      {showRules && <HowToPlayModal copy={copy} onClose={() => setShowRules(false)} />}
+          <StatusRail
+            score={state.score}
+            finalScore={state.finalScore}
+            timerRemaining={state.timerRemaining}
+            livesRemaining={state.livesRemaining}
+            stepsTaken={state.path.length}
+            par={challenge.par}
+            difficultyLabel={difficultyLabel}
+            copy={copy}
+          />
+        </main>
+
+        <footer className="mt-4 rounded-[4px] border border-[#1C3018] bg-[#0F1A0D] px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[#A89E80]">
+            <span>{copy.cabinet.footerInsertCoin}</span>
+            <span>{challenge.date}</span>
+            <span>{`STREAK ${streak}`}</span>
+          </div>
+        </footer>
+      </div>
     </div>
   )
 }
 
-function stateKeyForHistory(challengeDate: string, practiceMode: boolean): string {
-  return `${challengeDate}:${practiceMode}`
+function LocaleButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={[
+        'rounded-[3px] border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors',
+        active
+          ? 'border-[#8A6510] bg-[#1A1408] text-[#F5C842]'
+          : 'border-[#1C3018] bg-[#0A0E09] text-[#A89E80] hover:border-[#8A6510] hover:text-[#F5C842]',
+      ].join(' ')}
+    >
+      {label}
+    </button>
+  )
+}
+
+function CabinetNode({
+  label,
+  value,
+  tone,
+}: {
+  label: string
+  value: string
+  tone: 'start' | 'target'
+}) {
+  return (
+    <div
+      className={[
+        'rounded-[4px] border px-4 py-4',
+        tone === 'start'
+          ? 'border-[#004D24] bg-[#0A0E09]'
+          : 'border-[#8A6510] bg-[#0A0E09]',
+      ].join(' ')}
+    >
+      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#A89E80]">{label}</p>
+      <p
+        className={[
+          'mt-3 font-title text-xl leading-tight sm:text-2xl',
+          tone === 'start' ? 'text-[#2EFF7A]' : 'text-[#F5C842]',
+        ].join(' ')}
+      >
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function resolveDifficultyLabel(copy: ReturnType<typeof getCopy>, difficulty: Challenge['difficulty']) {
+  if (difficulty === 'groove') return copy.status.groove
+  if (difficulty === 'deep-cuts') return copy.status.deepCuts
+  return copy.status.amapiano
+}
+
+function getSolvedStreak(entries: HistoryEntry[]): number {
+  const solvedDates = Array.from(
+    new Set(
+      entries
+        .filter((entry) => entry.status === 'solved')
+        .map((entry) => entry.date)
+        .sort((a, b) => b.localeCompare(a))
+    )
+  )
+
+  if (solvedDates.length === 0) return 0
+
+  let streak = 0
+  let cursor = getSADateKey()
+
+  while (solvedDates.includes(cursor)) {
+    streak += 1
+    cursor = previousDate(cursor)
+  }
+
+  return streak
+}
+
+function previousDate(dateKey: string): string {
+  const date = new Date(`${dateKey}T00:00:00+02:00`)
+  date.setDate(date.getDate() - 1)
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Johannesburg',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
+
+function artistName(list: Artist[], id: string): string {
+  return list.find((artist) => artist.id === id)?.name ?? id
 }
 
 function getStoredLocale(): Locale {
