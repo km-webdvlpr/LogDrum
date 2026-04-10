@@ -3,6 +3,7 @@ import artistsData from './data/artists.json'
 import songsData from './data/songs.json'
 import { ArtistInputPanel } from './components/ArtistInputPanel'
 import { CluePanel } from './components/CluePanel'
+import { HowToPlayPanel } from './components/HowToPlayPanel'
 import { MoveRevealCard } from './components/MoveRevealCard'
 import { PathTrail } from './components/PathTrail'
 import { ResultScreen } from './components/ResultScreen'
@@ -181,6 +182,10 @@ export default function App() {
               />
             </section>
 
+            {(showRules || (state.status === 'playing' && state.path.length === 0)) && (
+              <HowToPlayPanel copy={copy} />
+            )}
+
             {state.status === 'playing' ? (
               <>
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -220,23 +225,6 @@ export default function App() {
               />
             )}
 
-            {showRules && (
-              <section className="rounded-[4px] border border-[#1C3018] bg-[#0F1A0D] px-4 py-4">
-                <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.24em] text-[#F5C842]">
-                  {copy.cabinet.howPanel}
-                </p>
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {copy.rules.steps.map((step, index) => (
-                    <div key={step} className="rounded-[4px] border border-[#1C3018] bg-[#0A0E09] px-3 py-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#2EFF7A]">
-                        {`0${index + 1}`}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-[#F0EAD0]">{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
           </section>
 
           <StatusRail

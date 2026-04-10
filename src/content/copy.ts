@@ -39,6 +39,20 @@ export interface AppCopy {
     noteTitle: string
     noteBody: string
   }
+  guide: {
+    title: string
+    subtitle: string
+    goalTitle: string
+    goalBody: string
+    moveTitle: string
+    moveBody: string
+    costTitle: string
+    costBody: string
+    scoreTitle: string
+    scoreBody: string
+    winTitle: string
+    winBody: string
+  }
   grid: {
     currentArtist: string
     liveOptions: string
@@ -226,6 +240,20 @@ const english: AppCopy = {
     noteBody:
       'WELA rewards music knowledge under pressure. The better you know the culture, the less you need to spend.',
   },
+  guide: {
+    title: 'How to play',
+    subtitle: 'Simple guide',
+    goalTitle: 'Goal',
+    goalBody: 'Get from the start artist to the target artist.',
+    moveTitle: 'Make a move',
+    moveBody: 'Type one artist at a time. If the link is real, WELA moves you forward.',
+    costTitle: 'What can go wrong',
+    costBody: 'A wrong guess costs 1 life. Clue 1 and 2 are free. Clue 3 to 5 cost points.',
+    scoreTitle: 'How to score well',
+    scoreBody: 'Finish fast, keep your lives, and avoid paid clues if you can.',
+    winTitle: 'How to win',
+    winBody: 'Reach the target before the timer ends or before you lose all 3 lives.',
+  },
   grid: {
     currentArtist: 'Current artist',
     liveOptions: 'Live options',
@@ -407,6 +435,20 @@ const zulu: AppCopy = {
     noteBody:
       'Inselelo ayisona ukuqagela okungaboni. Umvuzo ukuqonda ukuthi kungani laba baculi bexhumene.',
   },
+  guide: {
+    title: 'Indlela yokudlala',
+    subtitle: 'Umhlahlandlela olula',
+    goalTitle: 'Inhloso',
+    goalBody: 'Suka kumculi oqalayo uye kumculi wokugcina.',
+    moveTitle: 'Yenza ukuhamba',
+    moveBody: 'Bhala umculi oyedwa ngesikhathi. Uma uxhumano luyiqiniso, iWELA ikuyisa phambili.',
+    costTitle: 'Okungahamba kabi',
+    costBody: 'Ukuqagela okungalungile kudla impilo eyodwa. Iclue 1 no 2 zimahhala. Iclue 3 kuya ku 5 zidinga amaphuzu.',
+    scoreTitle: 'Ungazuza kanjani kahle',
+    scoreBody: 'Qeda ngokushesha, gcina izimpilo zakho, futhi ugweme amacebo akhokhelwayo uma ukwazi.',
+    winTitle: 'Uwina kanjani',
+    winBody: 'Finyelela kumculi wokugcina ngaphambi kokuphela kwesikhathi noma ngaphambi kokulahlekelwa yizo zonke izimpilo ezintathu.',
+  },
   grid: {
     currentArtist: 'Umculi okhona',
     liveOptions: 'Izinketho ezivuliwe',
@@ -587,6 +629,20 @@ const xhosa: AppCopy = {
     noteTitle: 'Kutheni iWELA isebenza',
     noteBody:
       'Umceli mngeni awusiyo ukuqikelela okungaboniyo. Umvuzo kukuqonda ukuba kutheni la magcisa enxibelelana.',
+  },
+  guide: {
+    title: 'Indlela yokudlala',
+    subtitle: 'Isikhokelo esilula',
+    goalTitle: 'Injongo',
+    goalBody: 'Hamba ukusuka kwigcisa lokuqala uye kwelijoliswe kulo.',
+    moveTitle: 'Yenza inyathelo',
+    moveBody: 'Chwetheza igcisa elinye ngexesha. Ukuba ikhonkco liyinyani, iWELA iyakusa phambili.',
+    costTitle: 'Yintoni enokungalungi',
+    costBody: 'Ukuqikelela gwenxa kudla ubomi obu-1. Iclue 1 no 2 zisimahla. Iclue 3 ukuya ku 5 zixabisa amanqaku.',
+    scoreTitle: 'Ufumana njani amanqaku amahle',
+    scoreBody: 'Gqiba ngokukhawuleza, gcina ubomi bakho, kwaye uphephe iingcebiso ezihlawulelwayo xa unako.',
+    winTitle: 'Uwina njani',
+    winBody: 'Fikelela kwigcisa ekujoliswe kulo phambi kokuphela kwexesha okanye phambi kokuba ulahlekelwe bubomi bonke obu-3.',
   },
   grid: {
     currentArtist: 'Igcisa langoku',
